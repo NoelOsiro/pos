@@ -31,32 +31,34 @@ export function emptyRows(page: number, rowsPerPage: number, arrayLength: number
  * const ex3 = getNestedProperty(data, 'more.protein');
  * console.log('ex3', ex3); // output: 42
  */
-function getNestedProperty<T>(obj: T, key: string): any {
-  return key.split('.').reduce((acc: any, part: string) => acc && acc[part], obj);
+function getNestedProperty(obj: unknown, key: string): unknown {
+  return key.split('.').reduce<unknown>((value, part) => {
+    if (value === null || typeof value !== 'object') return undefined;
+    return Reflect.get(value, part);
+  }, obj);
 }
 
-function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
-  const aValue = getNestedProperty(a, orderBy as string);
-  const bValue = getNestedProperty(b, orderBy as string);
+function descendingComparator(a: object, b: object, orderBy: string) {
+  const aValue = getNestedProperty(a, orderBy);
+  const bValue = getNestedProperty(b, orderBy);
 
-  if (bValue < aValue) {
-    return -1;
-  }
+  if (aValue === bValue) return 0;
+  if (aValue === null || aValue === undefined) return 1;
+  if (bValue === null || bValue === undefined) return -1;
+  if (typeof aValue === 'number' && typeof bValue === 'number') return bValue - aValue;
 
-  if (bValue > aValue) {
-    return 1;
-  }
-
-  return 0;
+  const aText = String(aValue);
+  const bText = String(bValue);
+  return bText < aText ? -1 : bText > aText ? 1 : 0;
 }
 
 // ----------------------------------------------------------------------
 
-export function getComparator<Key extends keyof any>(
+export function getComparator<Key extends PropertyKey>(
   order: 'asc' | 'desc',
   orderBy: Key
-): (a: { [key in Key]: number | string }, b: { [key in Key]: number | string }) => number {
+): (a: object, b: object) => number {
   return order === 'desc'
-    ? (a, b) => descendingComparator(a, b, orderBy)
-    : (a, b) => -descendingComparator(a, b, orderBy);
+    ? (a, b) => descendingComparator(a, b, String(orderBy))
+    : (a, b) => -descendingComparator(a, b, String(orderBy));
 }

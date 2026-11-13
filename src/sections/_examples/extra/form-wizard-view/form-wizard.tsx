@@ -1,7 +1,7 @@
 import { z as zod } from 'zod';
 import { useForm } from 'react-hook-form';
 import { useState, useCallback } from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { zodResolver } from '@/utils/zod-resolver';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';

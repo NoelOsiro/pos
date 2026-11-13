@@ -29,16 +29,8 @@ export type IProductItem = {
   stockQuantity: number;
   minStock: number;
   coverUrl?: string;
-  images?: string[];
   description?: string;
   isActive?: boolean;
-  available?: boolean;
-  gender?: string[];
-  colors?: string[];
-  totalRatings?: number;
-  totalReviews?: number;
-  ratings?: { name: string; starCount: number; reviewCount: number }[];
-  reviews?: any[];
   createdAt?: IDateValue;
   updatedAt?: IDateValue;
 };
@@ -58,20 +50,4 @@ export type ProductFormValues = {
 
 export type ProductCsvRow = Omit<ProductFormValues, 'categoryId'> & {
   category: string;
-};
-
-export type IProductFilters = {
-  name: string;
-  category: string;
-  status: string;
-  priceRange: number[];
-  stockStatus: string;
-  rating?: string;
-  gender?: string[];
-  colors?: string[];
-};
-
-export type IProductTableFilters = {
-  stock: string[];
-  category: string[];
 };

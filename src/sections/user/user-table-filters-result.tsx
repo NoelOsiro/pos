@@ -1,6 +1,5 @@
 import type { IUserTableFilters } from '@/types/user';
 import type { UseSetStateReturn } from 'minimal-shared/hooks';
-import type { ICustomerTableFilters } from '@/types/customer';
 import type { FiltersResultProps } from '@/components/filters-result';
 
 import { useCallback } from 'react';
@@ -13,7 +12,7 @@ import { chipProps, FiltersBlock, FiltersResult } from '@/components/filters-res
 
 type Props = FiltersResultProps & {
   onResetPage: () => void;
-  filters: UseSetStateReturn<IUserTableFilters | ICustomerTableFilters>;
+  filters: UseSetStateReturn<IUserTableFilters>;
 };
 
 export function UserTableFiltersResult({ filters, onResetPage, totalResults, sx }: Props) {
@@ -31,7 +30,7 @@ export function UserTableFiltersResult({ filters, onResetPage, totalResults, sx 
 
   const handleRemoveRole = useCallback(
     (inputValue: string) => {
-      const newValue = currentFilters.role.filter((item) => item !== inputValue);
+      const newValue = currentFilters.role?.filter((item) => item !== inputValue);
 
       onResetPage();
       updateFilters({ role: newValue });
@@ -46,17 +45,17 @@ export function UserTableFiltersResult({ filters, onResetPage, totalResults, sx 
 
   return (
     <FiltersResult totalResults={totalResults} onReset={handleReset} sx={sx}>
-      <FiltersBlock label="Status:" isShow={currentFilters.status !== 'all'}>
+      <FiltersBlock label="Status:" isShow={currentFilters.status !== 'all' && !!currentFilters.status}>
         <Chip
           {...chipProps}
-          label={currentFilters.status}
+          label={currentFilters.status ?? ''}
           onDelete={handleRemoveStatus}
           sx={{ textTransform: 'capitalize' }}
         />
       </FiltersBlock>
 
-      <FiltersBlock label="Role:" isShow={!!currentFilters.role.length}>
-        {currentFilters.role.map((item) => (
+      <FiltersBlock label="Role:" isShow={!!currentFilters.role?.length}>
+        {currentFilters.role?.map((item) => (
           <Chip {...chipProps} key={item} label={item} onDelete={() => handleRemoveRole(item)} />
         ))}
       </FiltersBlock>

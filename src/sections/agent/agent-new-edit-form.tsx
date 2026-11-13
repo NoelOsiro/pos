@@ -7,7 +7,7 @@ import { useRouter } from '@/routes/hooks';
 import { Label } from '@/components/label';
 import { toast } from '@/components/snackbar';
 import { useAgentStore } from '@/store/agentStore';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { zodResolver } from '@/utils/zod-resolver';
 import { Form, Field, schemaHelper } from '@/components/hook-form';
 import { isValidPhoneNumber } from 'react-phone-number-input/input';
 

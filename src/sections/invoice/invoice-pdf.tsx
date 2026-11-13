@@ -149,10 +149,10 @@ function InvoicePdfDocument({ invoice, currentStatus }: InvoicePdfDocumentProps)
 
   const renderHeader = () => (
     <View style={[styles.container, styles.mb40]}>
+      {/* eslint-disable-next-line jsx-a11y/alt-text -- React PDF Image does not support alt text. */}
       <Image
         source="/logo/logo-single.png"
         style={{ width: 48, height: 48 }}
-        alt="Invoice logo"
       />
 
       <View style={{ alignItems: 'flex-end', flexDirection: 'column' }}>

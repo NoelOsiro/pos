@@ -6,7 +6,6 @@ import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';
 
 import { _appFeatured, _appInvoices } from '@/_mock';
-import { useDashStore } from '@/store/dashboardStore';
 import { DashboardContent } from '@/layouts/dashboard';
 import { SeoIllustration } from '@/assets/illustrations';
 
@@ -18,7 +17,6 @@ import { AppWidget } from '../app-widget';
 import { AppWelcome } from '../app-welcome';
 import { AppFeatured } from '../app-featured';
 import { AppNewInvoice } from '../app-new-invoice';
-import { AppTopRelated } from '../app-top-related';
 import { AppAreaInstalled } from '../app-area-installed';
 import { AppWidgetSummary } from '../app-widget-summary';
 import { AppCurrentDownload } from '../app-current-download';
@@ -27,8 +25,6 @@ import { AppCurrentDownload } from '../app-current-download';
 
 export function OverviewAppView() {
   const { user } = useAuthContext();
-
-  const { leave_requests } = useDashStore();
 
   const theme = useTheme();
 
@@ -254,15 +250,6 @@ export function OverviewAppView() {
             ]}
           />
         </Grid>
-
-        <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          {user?.role === 'admin' && (<AppTopRelated title="Leave applications" list={leave_requests} />)}
-          {user?.role === 'cashier' && (
-            <AppTopRelated title="Related applications" list={leave_requests} />
-          )}
-        </Grid>
-
-
 
         <Grid size={{ xs: 12, md: 12, lg: 12 }}>
           <Box sx={{ gap: 3, display: 'flex', flexDirection: 'row' }}>

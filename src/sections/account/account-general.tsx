@@ -1,6 +1,6 @@
 import { z as zod } from 'zod';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { zodResolver } from '@/utils/zod-resolver';
 import { isValidPhoneNumber } from 'react-phone-number-input/input';
 
 import Box from '@mui/material/Box';
@@ -17,6 +17,7 @@ import { toast } from '@/components/snackbar';
 import { Form, Field, schemaHelper } from '@/components/hook-form';
 
 import { useMockedUser } from '@/auth/hooks';
+import type { ICustomerItem } from '@/types/customer';
 
 // ----------------------------------------------------------------------
 
@@ -47,7 +48,7 @@ export const UpdateUserSchema = zod.object({
 
 
 type AccountGeneralProps = {
-  customer?: any;
+  customer?: ICustomerItem;
 };
 
 export function AccountGeneral({ customer }: AccountGeneralProps) {
@@ -58,12 +59,12 @@ export function AccountGeneral({ customer }: AccountGeneralProps) {
         displayName: customer.name,
         email: customer.email,
         photoURL: customer.avatarUrl || null,
-        phoneNumber: customer.phoneNumber,
-        country: customer.country,
-        address: customer.address,
-        state: customer.state,
-        city: customer.city,
-        zipCode: customer.zipCode,
+        phoneNumber: customer.phoneNumber ?? '',
+        country: customer.country ?? null,
+        address: customer.address ?? '',
+        state: customer.state ?? '',
+        city: customer.city ?? '',
+        zipCode: customer.zipCode ?? '',
         about: '',
         isPublic: !!customer.isVerified,
       }

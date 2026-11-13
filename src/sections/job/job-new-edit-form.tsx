@@ -1,7 +1,7 @@
 import type { IJobItem } from '@/types/job';
 
 import { z as zod } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { zodResolver } from '@/utils/zod-resolver';
 import { useForm, Controller } from 'react-hook-form';
 
 import Box from '@mui/material/Box';

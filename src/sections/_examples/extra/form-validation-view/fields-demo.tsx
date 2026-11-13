@@ -1,6 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { useBoolean } from 'minimal-shared/hooks';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { zodResolver } from '@/utils/zod-resolver';
 
 import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';

@@ -6,7 +6,7 @@ import type {
 
 import { z as zod } from 'zod';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { zodResolver } from '@/utils/zod-resolver';
 
 import Grid from '@mui/material/Grid2';
 import Button from '@mui/material/Button';

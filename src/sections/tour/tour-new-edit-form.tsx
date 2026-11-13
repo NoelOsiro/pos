@@ -3,7 +3,7 @@ import type { ITourItem, ITourGuide } from '@/types/tour';
 import { z as zod } from 'zod';
 import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { zodResolver } from '@/utils/zod-resolver';
 
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';

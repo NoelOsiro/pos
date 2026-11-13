@@ -5,35 +5,17 @@ import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import CardHeader from '@mui/material/CardHeader';
 
-import { fDate } from '@/utils/format-time';
-
 import { Iconify } from '@/components/iconify';
-import { CooperativeSummary } from '@/auth/types';
-
-// ----------------------------------------------------------------------
 
 type Props = {
   user: AuthUserView;
-  cooperative: CooperativeSummary | null;
 };
 
-export function ProfileHome({ user, cooperative }: Props) {
+export function ProfileHome({ user }: Props) {
   const rows = [
     { icon: 'fluent:mail-24-filled', label: user.email },
-    user.profile?.phone && { icon: 'solar:phone-bold', label: user.profile.phone },
-    cooperative && {
-      icon: 'ic:round-business-center',
-      label: `${cooperative.role_display} at ${cooperative.name} (${cooperative.code})`,
-    },
-    user.countyIds?.length > 0 && {
-      icon: 'mingcute:location-fill',
-      label: `Assigned to ${user.countyIds.length} county${user.countyIds.length > 1 ? ' areas' : ''}`,
-    },
-    user.date_joined && {
-      icon: 'solar:calendar-date-bold',
-      label: `Member since ${fDate(user.date_joined)}`,
-    },
-  ].filter(Boolean) as { icon: string; label: string }[];
+    user.role && { icon: 'solar:user-id-bold', label: user.role },
+  ].filter((row): row is { icon: string; label: string } => Boolean(row));
 
   return (
     <Card sx={{ maxWidth: 560 }}>

@@ -9,7 +9,7 @@ import { useSearchParams } from '@/routes/hooks';
 import { RouterLink } from '@/routes/components';
 import { useBoolean } from 'minimal-shared/hooks';
 import { Form, Field } from '@/components/hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { zodResolver } from '@/utils/zod-resolver';
 
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
@@ -50,7 +50,7 @@ export function JwtSignInView() {
   const returnTo = searchParams.get('returnTo');
 
   const methods = useForm<FormValues>({
-    resolver: zodResolver(schema as any),
+    resolver: zodResolver(schema),
     defaultValues: { email: '', password: '' },
     mode: 'onChange',
   });

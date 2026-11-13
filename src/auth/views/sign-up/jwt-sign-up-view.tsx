@@ -4,7 +4,7 @@ import { z as zod } from 'zod/v4';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useBoolean } from 'minimal-shared/hooks';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { zodResolver } from '@/utils/zod-resolver';
 
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
@@ -66,7 +66,7 @@ export function JwtSignUpView() {
   };
 
   const methods = useForm<SignUpSchemaType>({
-    resolver: zodResolver(SignUpSchema as any),
+    resolver: zodResolver(SignUpSchema),
     defaultValues,
   });
 

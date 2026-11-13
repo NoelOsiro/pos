@@ -39,6 +39,7 @@ export function UserTableRow({ row, selected, editHref, onSelectRow, onDeleteRow
   const menuActions = usePopover();
   const confirmDialog = useBoolean();
   const quickEditForm = useBoolean();
+  const status = 'status' in row ? row.status : row.isActive ? 'active' : 'inactive';
 
   const renderQuickEditForm = () => (
     <UserQuickEditForm
@@ -137,13 +138,13 @@ export function UserTableRow({ row, selected, editHref, onSelectRow, onDeleteRow
           <Label
             variant="soft"
             color={
-              (row.status === 'active' && 'success') ||
-              (row.status === 'pending' && 'warning') ||
-              (row.status === 'banned' && 'error') ||
+              (status === 'active' && 'success') ||
+              (status === 'pending' && 'warning') ||
+              (status === 'banned' && 'error') ||
               'default'
             }
           >
-            {row.status}
+            {status}
           </Label>
         </TableCell>
 
