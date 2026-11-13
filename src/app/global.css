@@ -1,0 +1,59 @@
+/** **************************************
+* Fonts: app
+*************************************** */
+/* 💡 Switched to Kumbh Sans variable font package */
+@import '@fontsource-variable/kumbh-sans';
+
+/** **************************************
+* Plugins
+*************************************** */
+/* scrollbar */
+@import '../components/scrollbar/styles.css';
+
+/* map */
+@import '../components/map/styles.css';
+
+/* lightbox */
+@import '../components/lightbox/styles.css';
+
+/* chart */
+@import '../components/chart/styles.css';
+
+/** **************************************
+* Baseline
+*************************************** */
+html {
+  height: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+body,
+#root,
+#root__layout {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 100%;
+  flex-direction: column;
+  /* 💡 Ensure Kumbh Sans applies down across your fallback render arrays */
+  font-family: 'Kumbh Sans', sans-serif;
+}
+img {
+  max-width: 100%;
+  vertical-align: middle;
+}
+ul {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: none;
+}
+input[type='number']::-webkit-outer-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+input[type='number']::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
