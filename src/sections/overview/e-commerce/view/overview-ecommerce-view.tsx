@@ -13,7 +13,7 @@ import {
   _ecommerceLatestProducts,
 } from '@/_mock';
 
-import { useMockedUser } from '@/auth/hooks';
+import { useAuthContext, useMockedUser } from '@/auth/hooks';
 
 import { EcommerceWelcome } from '../ecommerce-welcome';
 import { EcommerceNewProducts } from '../ecommerce-new-products';
@@ -28,7 +28,7 @@ import { EcommerceCurrentBalance } from '../ecommerce-current-balance';
 // ----------------------------------------------------------------------
 
 export function OverviewEcommerceView() {
-  const { user } = useMockedUser();
+  const { user } = useAuthContext();
 
   const theme = useTheme();
 
@@ -37,7 +37,7 @@ export function OverviewEcommerceView() {
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 8 }}>
           <EcommerceWelcome
-            title={`Congratulations 🎉  \n ${user?.displayName}`}
+            title={`Congratulations 🎉  \n ${user?.name}`}
             description="Best seller of the month you have done 57.6% more sales today."
             img={<MotivationIllustration hideBackground />}
             action={

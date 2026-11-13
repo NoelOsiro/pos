@@ -1,14 +1,15 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
+import { useEffect } from "react";
 
-import { useSearchParams } from '@/routes/hooks';
+import { paths } from "@/routes/paths";
+import { useSearchParams } from "@/routes/hooks";
 
-import { CONFIG } from '@/global-config';
+import { CONFIG } from "@/global-config";
 
-import { SplashScreen } from '@/components/loading-screen';
+import { SplashScreen } from "@/components/loading-screen";
 
-import { useAuthContext } from '../hooks';
+import { useAuthContext } from "../hooks";
 
 // ----------------------------------------------------------------------
 
@@ -17,35 +18,20 @@ type GuestGuardProps = {
 };
 
 export function GuestGuard({ children }: GuestGuardProps) {
-  const { loading, authenticated } = useAuthContext();
+  const { loading, authenticated, onboardingComplete } = useAuthContext();
 
   const searchParams = useSearchParams();
-  const returnTo = searchParams.get('returnTo') || CONFIG.auth.redirectPath;
-
-  const [isChecking, setIsChecking] = useState<boolean>(true);
-
-  const checkPermissions = async (): Promise<void> => {
-    if (loading) {
-      return;
-    }
-
-    if (authenticated) {
-      // Redirect authenticated users to the returnTo path
-      // Using `window.location.href` instead of `router.replace` to avoid unnecessary re-rendering
-      // that might be caused by the AuthGuard component
-      window.location.href = returnTo;
-      return;
-    }
-
-    setIsChecking(false);
-  };
+  const returnTo = searchParams.get("returnTo") || CONFIG.auth.redirectPath;
 
   useEffect(() => {
-    checkPermissions();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authenticated, loading]);
+    if (!loading && authenticated) {
+      // Use a full navigation so the auth guards re-read the session.
+      window.location.href =
+        onboardingComplete === true ? returnTo : paths.onboarding;
+    }
+  }, [authenticated, loading, onboardingComplete, returnTo]);
 
-  if (isChecking) {
+  if (loading || authenticated) {
     return <SplashScreen />;
   }
 

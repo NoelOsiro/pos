@@ -37,7 +37,7 @@ export function OverviewAppView() {
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 8 }}>
           <AppWelcome
-            title={`Welcome back 👋 \n ${user?.first_name} ${user?.last_name}`}
+            title={`Welcome back 👋 \n ${user?.name}`}
             description="Fill your Profile to get started"
             img={<SeoIllustration hideBackground />}
             action={
@@ -53,7 +53,7 @@ export function OverviewAppView() {
         </Grid>
 
         <Grid size={{ xs: 12, md: 4 }}>
-          {user?.role === 'coopadmin' && (
+          {user?.role === 'admin' && (
             <AppWidgetSummary
               title="Total Active Users"
               percent={2.6}
@@ -63,7 +63,7 @@ export function OverviewAppView() {
                 series: [15, 18, 12, 51, 68, 11, 39, 37],
               }}
             />)}
-          {user?.role === 'agent' && (
+          {user?.role === 'cashier' && (
             <AppWidgetSummary
               title="Total Active Users"
               percent={2.6}
@@ -76,7 +76,7 @@ export function OverviewAppView() {
         </Grid>
 
         <Grid size={{ xs: 12, md: 4 }}>
-          {user?.role === 'coopadmin' && (
+          {user?.role === 'admin' && (
             <AppWidgetSummary
               title="Total Hotspot users"
               percent={0.2}
@@ -87,7 +87,7 @@ export function OverviewAppView() {
                 series: [20, 41, 63, 33, 28, 35, 50, 46],
               }}
             />)}
-          {user?.role === 'agent' && (
+          {user?.role === 'cashier' && (
             <AppWidgetSummary
               title="Total Hotspot users"
               percent={0.2}
@@ -102,7 +102,7 @@ export function OverviewAppView() {
         </Grid>
 
         <Grid size={{ xs: 12, md: 4 }}>
-          {user?.role === 'coopadmin' && (
+          {user?.role === 'admin' && (
             <AppWidgetSummary
               title="Total PPPoE users"
               percent={-0.1}
@@ -113,7 +113,7 @@ export function OverviewAppView() {
                 series: [18, 19, 31, 8, 16, 37, 12, 33],
               }}
             />)}
-          {user?.role === 'agent' && (
+          {user?.role === 'cashier' && (
             <AppWidgetSummary
               title="Total PPPoE users"
               percent={-0.1}
@@ -127,7 +127,7 @@ export function OverviewAppView() {
         </Grid>
 
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          {user?.role === 'coopadmin' && (<AppCurrentDownload
+          {user?.role === 'admin' && (<AppCurrentDownload
             title="Client Distribution"
             subheader=""
             chart={{
@@ -137,7 +137,7 @@ export function OverviewAppView() {
               ],
             }}
           />)}
-          {user?.role === 'agent' && (
+          {user?.role === 'cashier' && (
             <AppCurrentDownload
               title="Client Distribution"
               subheader=""
@@ -151,7 +151,7 @@ export function OverviewAppView() {
         </Grid>
 
         <Grid size={{ xs: 12, md: 6, lg: 8 }}>
-          {user?.role === 'coopadmin' && (<AppAreaInstalled
+          {user?.role === 'admin' && (<AppAreaInstalled
             title="Sessions active monthly"
             subheader="(+43%) than last year"
             chart={{
@@ -194,7 +194,7 @@ export function OverviewAppView() {
               ],
             }}
           />)}
-          {user?.role === 'agent' && (
+          {user?.role === 'cashier' && (
             <AppAreaInstalled
               title="Sessions active monthly"
               subheader="(+43%) than last year"
@@ -256,8 +256,8 @@ export function OverviewAppView() {
         </Grid>
 
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          {user?.role === 'coopadmin' && (<AppTopRelated title="Leave applications" list={leave_requests} />)}
-          {user?.role === 'agent' && (
+          {user?.role === 'admin' && (<AppTopRelated title="Leave applications" list={leave_requests} />)}
+          {user?.role === 'cashier' && (
             <AppTopRelated title="Related applications" list={leave_requests} />
           )}
         </Grid>

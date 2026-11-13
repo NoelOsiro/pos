@@ -1,5 +1,5 @@
-import { kebabCase } from 'es-toolkit';
-import { _id, _postTitles } from '@/_mock/assets';
+import { kebabCase } from "es-toolkit";
+import { _id, _postTitles } from "@/_mock/assets";
 
 // ----------------------------------------------------------------------
 
@@ -8,31 +8,32 @@ const MOCK_ID = _id[1];
 const MOCK_TITLE = _postTitles[2];
 
 const ROOTS = {
-  AUTH: '/auth',
-  DASHBOARD: '/dashboard',
+  AUTH: "/auth",
+  DASHBOARD: "/dashboard",
 };
 
 // ----------------------------------------------------------------------
 
 export const paths = {
-  comingSoon: '/coming-soon',
-  maintenance: '/maintenance',
-  pricing: '/pricing',
-  payment: '/payment',
-  about: '/about-us',
-  contact: '/contact-us',
-  faqs: '/faqs',
-  page403: '/error/403',
-  page404: '/error/404',
-  page500: '/error/500',
-  cooperativeBound: '/error/cooperative-bound',
-  components: '/components',
-  docs: 'https://docs.minimals.cc',
-  changelog: 'https://docs.minimals.cc/changelog',
-  zoneStore: 'https://mui.com/store/items/zone-landing-page/',
-  minimalStore: 'https://mui.com/store/items/minimal-dashboard/',
-  freeUI: 'https://mui.com/store/items/minimal-dashboard-free/',
-  figmaUrl: 'https://www.figma.com/design/cAPz4pYPtQEXivqe11EcDE/%5BPreview%5D-Minimal-Web.v6.0.0',
+  comingSoon: "/coming-soon",
+  maintenance: "/maintenance",
+  pricing: "/pricing",
+  payment: "/payment",
+  about: "/about-us",
+  contact: "/contact-us",
+  faqs: "/faqs",
+  page403: "/error/403",
+  page404: "/error/404",
+  page500: "/error/500",
+  cooperativeBound: "/error/cooperative-bound",
+  components: "/components",
+  docs: "https://docs.minimals.cc",
+  changelog: "https://docs.minimals.cc/changelog",
+  zoneStore: "https://mui.com/store/items/zone-landing-page/",
+  minimalStore: "https://mui.com/store/items/minimal-dashboard/",
+  freeUI: "https://mui.com/store/items/minimal-dashboard-free/",
+  figmaUrl:
+    "https://www.figma.com/design/cAPz4pYPtQEXivqe11EcDE/%5BPreview%5D-Minimal-Web.v6.0.0",
   leave: {
     root: `/leave`,
     checkout: `/leave/checkout`,
@@ -52,6 +53,7 @@ export const paths = {
     /** OAuth (authorization code + PKCE) redirect target. */
     callback: `${ROOTS.AUTH}/callback`,
   },
+  onboarding: "/onboarding",
   // DASHBOARD
   dashboard: {
     root: ROOTS.DASHBOARD,
@@ -237,7 +239,8 @@ export const paths = {
       root: `${ROOTS.DASHBOARD}/post`,
       new: `${ROOTS.DASHBOARD}/post/new`,
       details: (title: string) => `${ROOTS.DASHBOARD}/post/${kebabCase(title)}`,
-      edit: (title: string) => `${ROOTS.DASHBOARD}/post/${kebabCase(title)}/edit`,
+      edit: (title: string) =>
+        `${ROOTS.DASHBOARD}/post/${kebabCase(title)}/edit`,
       demo: {
         details: `${ROOTS.DASHBOARD}/post/${kebabCase(MOCK_TITLE)}`,
         edit: `${ROOTS.DASHBOARD}/post/${kebabCase(MOCK_TITLE)}/edit`,
@@ -270,7 +273,7 @@ export const paths = {
     },
     // ---- POS paths ----
     overview: {
-      root: `${ROOTS.DASHBOARD}/overview`,
+      root: `${ROOTS.DASHBOARD}`,
     },
     analytics: {
       root: `${ROOTS.DASHBOARD}/analytics`,
@@ -311,9 +314,9 @@ export const paths = {
 
   // product
   product: {
-    root: '/product',
-    demo: { details: '/product/1' },
-    checkout: '/product/checkout',
+    root: "/product",
+    demo: { details: "/product/1" },
+    checkout: "/product/checkout",
     details: (id: string) => `/product/${id}`,
   },
 };

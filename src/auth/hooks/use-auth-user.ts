@@ -6,11 +6,11 @@ import { getPermissions } from '../permissions';
 
 import { useAuthContext } from './use-auth-context';
 
-import type { PosUser } from '../types';
+import type { AuthContextValue } from '../types';
 
 // ----------------------------------------------------------------------
 
-export type AuthUserView = PosUser & {
+export type AuthUserView = NonNullable<AuthContextValue['user']> & {
   displayName: string;
   photoURL: string;
   username: string;
@@ -33,7 +33,7 @@ export function useAuthUser() {
           : {
               ...user,
               displayName,
-              photoURL: (user as any).imageUrl ?? (user as any).image ?? '',
+              photoURL: user.image ?? '',
               username: user.email,
             } satisfies AuthUserView,
       role,

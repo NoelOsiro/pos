@@ -1,4 +1,15 @@
-import { pgTable, text, timestamp, varchar, numeric, integer, boolean, jsonb } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  timestamp,
+  varchar,
+  numeric,
+  integer,
+  boolean,
+  jsonb,
+  unique,
+  index,
+} from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
   id: varchar("id", { length: 255 }).primaryKey(),
@@ -19,6 +30,47 @@ export const userRoles = pgTable("user_roles", {
   permissions: jsonb("permissions").$type<string[]>().default([]),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+export const shops = pgTable(
+  "shops",
+  {
+    id: varchar("id", { length: 255 }).primaryKey(),
+    name: text("name").notNull(),
+    location: text("location").notNull(),
+    address: text("address").notNull(),
+    businessType: varchar("business_type", { length: 64 }).notNull(),
+    contactEmail: text("contact_email"),
+    contactPhone: text("contact_phone"),
+    inviteCodeHash: varchar("invite_code_hash", { length: 64 })
+      .notNull()
+      .unique(),
+    createdBy: varchar("created_by", { length: 255 })
+      .notNull()
+      .references(() => users.id, { onDelete: "restrict" }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [index("shops_created_by_idx").on(table.createdBy)],
+);
+
+export const shopMembers = pgTable(
+  "shop_members",
+  {
+    id: varchar("id", { length: 255 }).primaryKey(),
+    shopId: varchar("shop_id", { length: 255 })
+      .notNull()
+      .references(() => shops.id, { onDelete: "cascade" }),
+    userId: varchar("user_id", { length: 255 })
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    role: varchar("role", { length: 32 }).notNull().default("cashier"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    unique("shop_members_shop_user_key").on(table.shopId, table.userId),
+    index("shop_members_user_id_idx").on(table.userId),
+  ],
+);
 
 export const categories = pgTable("categories", {
   id: varchar("id", { length: 255 }).primaryKey(),
