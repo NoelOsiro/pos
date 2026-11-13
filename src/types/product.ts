@@ -43,6 +43,19 @@ export type IProductItem = {
   updatedAt?: IDateValue;
 };
 
+export type ProductFormValues = {
+  name: string;
+  sku: string;
+  categoryId: string;
+  price: string;
+  costPrice: string;
+  stockQuantity: number;
+  minStock: number;
+  coverUrl: string;
+  description: string;
+  isActive: boolean;
+};
+
 export type IProductFilters = {
   name: string;
   category: string;
