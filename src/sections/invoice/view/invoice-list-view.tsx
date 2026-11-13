@@ -27,7 +27,7 @@ import { RouterLink } from '@/routes/components';
 import { fIsAfter, fIsBetween } from '@/utils/format-time';
 
 import { DashboardContent } from '@/layouts/dashboard';
-import { _invoices, INVOICE_SERVICE_OPTIONS } from '@/_mock';
+import { _invoices } from '@/_mock';
 
 import { Label } from '@/components/label';
 import { toast } from '@/components/snackbar';
@@ -56,10 +56,10 @@ import { InvoiceTableFiltersResult } from '../invoice-table-filters-result';
 
 const TABLE_HEAD: TableHeadCellProps[] = [
   { id: 'invoiceNumber', label: 'Customer' },
-  { id: 'createDate', label: 'Create' },
+  { id: 'createdAt', label: 'Create' },
   { id: 'dueDate', label: 'Due' },
-  { id: 'price', label: 'Amount' },
-  { id: 'sent', label: 'Sent', align: 'center' },
+  { id: 'totalAmount', label: 'Amount' },
+  { id: 'orderId', label: 'Order', align: 'center' },
   { id: 'status', label: 'Status' },
   { id: '' },
 ];
@@ -69,7 +69,7 @@ const TABLE_HEAD: TableHeadCellProps[] = [
 export function InvoiceListView() {
   const theme = useTheme();
 
-  const table = useTable({ defaultOrderBy: 'createDate' });
+  const table = useTable({ defaultOrderBy: 'createdAt' });
 
   const confirmDialog = useBoolean();
 
@@ -77,7 +77,6 @@ export function InvoiceListView() {
 
   const filters = useSetState<IInvoiceTableFilters>({
     name: '',
-    service: [],
     status: 'all',
     startDate: null,
     endDate: null,
@@ -97,7 +96,6 @@ export function InvoiceListView() {
 
   const canReset =
     !!currentFilters.name ||
-    currentFilters.service.length > 0 ||
     currentFilters.status !== 'all' ||
     (!!currentFilters.startDate && !!currentFilters.endDate);
 
@@ -113,7 +111,7 @@ export function InvoiceListView() {
     );
 
   const getPercentByStatus = (status: string) =>
-    (getInvoiceLength(status) / tableData.length) * 100;
+    tableData.length ? (getInvoiceLength(status) / tableData.length) * 100 : 0;
 
   const TABS = [
     {
@@ -315,7 +313,6 @@ export function InvoiceListView() {
             filters={filters}
             dateError={dateError}
             onResetPage={table.onResetPage}
-            options={{ services: INVOICE_SERVICE_OPTIONS.map((option) => option.name) }}
           />
 
           {canReset && (
@@ -436,11 +433,11 @@ type ApplyFilterProps = {
   dateError: boolean;
   inputData: IInvoice[];
   filters: IInvoiceTableFilters;
-  comparator: (a: any, b: any) => number;
+  comparator: (a: IInvoice, b: IInvoice) => number;
 };
 
 function applyFilter({ inputData, comparator, filters, dateError }: ApplyFilterProps) {
-  const { name, status, service, startDate, endDate } = filters;
+  const { name, status, startDate, endDate } = filters;
 
   const stabilizedThis = inputData.map((el, index) => [el, index] as const);
 
@@ -453,8 +450,8 @@ function applyFilter({ inputData, comparator, filters, dateError }: ApplyFilterP
   inputData = stabilizedThis.map((el) => el[0]);
 
   if (name) {
-    inputData = inputData.filter(({ invoiceNumber, invoiceTo }) =>
-      [invoiceNumber, invoiceTo.name, invoiceTo.company, invoiceTo.phoneNumber].some((field) =>
+    inputData = inputData.filter(({ invoiceNumber, customerName, customerId, orderId }) =>
+      [invoiceNumber, customerName, customerId, orderId].some((field) =>
         field?.toLowerCase().includes(name.toLowerCase())
       )
     );
@@ -464,15 +461,9 @@ function applyFilter({ inputData, comparator, filters, dateError }: ApplyFilterP
     inputData = inputData.filter((invoice) => invoice.status === status);
   }
 
-  if (service.length) {
-    inputData = inputData.filter((invoice) =>
-      invoice.items.some((filterItem) => service.includes(filterItem.service))
-    );
-  }
-
   if (!dateError) {
     if (startDate && endDate) {
-      inputData = inputData.filter((invoice) => fIsBetween(invoice.createDate, startDate, endDate));
+      inputData = inputData.filter((invoice) => fIsBetween(invoice.createdAt, startDate, endDate));
     }
   }
 

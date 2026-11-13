@@ -85,17 +85,17 @@ export function InvoiceDetails({ invoice }: Props) {
 
               <TableCell>
                 <Box sx={{ maxWidth: 560 }}>
-                  <Typography variant="subtitle2">{row.title}</Typography>
+                  <Typography variant="subtitle2">{row.name}</Typography>
 
                   <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-                    {row.description}
+                    {row.sku}
                   </Typography>
                 </Box>
               </TableCell>
 
               <TableCell>{row.quantity}</TableCell>
-              <TableCell align="right">{fCurrency(row.price)}</TableCell>
-              <TableCell align="right">{fCurrency(row.price * row.quantity)}</TableCell>
+              <TableCell align="right">{fCurrency(row.unitPrice)}</TableCell>
+              <TableCell align="right">{fCurrency(row.lineTotal)}</TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -146,33 +146,29 @@ export function InvoiceDetails({ invoice }: Props) {
 
           <Stack sx={{ typography: 'body2' }}>
             <Typography variant="subtitle2" sx={{ mb: 1 }}>
-              Invoice from
+              Customer
             </Typography>
-            {invoice?.invoiceFrom.name}
-            <br />
-            {invoice?.invoiceFrom.fullAddress}
-            <br />
-            Phone: {invoice?.invoiceFrom.phoneNumber}
-            <br />
+            {invoice?.customerName}
+            {invoice?.customerId && (
+              <>
+                <br />
+                Customer ID: {invoice.customerId}
+              </>
+            )}
           </Stack>
 
           <Stack sx={{ typography: 'body2' }}>
             <Typography variant="subtitle2" sx={{ mb: 1 }}>
-              Invoice to
+              Related order
             </Typography>
-            {invoice?.invoiceTo.name}
-            <br />
-            {invoice?.invoiceTo.fullAddress}
-            <br />
-            Phone: {invoice?.invoiceTo.phoneNumber}
-            <br />
+            {invoice?.orderId || '—'}
           </Stack>
 
           <Stack sx={{ typography: 'body2' }}>
             <Typography variant="subtitle2" sx={{ mb: 1 }}>
               Date create
             </Typography>
-            {fDate(invoice?.createDate)}
+            {fDate(invoice?.createdAt)}
           </Stack>
 
           <Stack sx={{ typography: 'body2' }}>
@@ -188,10 +184,9 @@ export function InvoiceDetails({ invoice }: Props) {
         <Divider sx={{ borderStyle: 'dashed' }} />
 
         <InvoiceTotalSummary
-          taxes={invoice?.taxes}
+          taxAmount={invoice?.tax}
           subtotal={invoice?.subtotal}
           discount={invoice?.discount}
-          shipping={invoice?.shipping}
           totalAmount={invoice?.totalAmount}
         />
 

@@ -60,7 +60,7 @@ export function PackageProfileView() {
   const selectedTab = searchParams.get(TAB_PARAM) ?? '';
 
   const { user } = useAuthUser();
-  const displayName = `${user?.first_name} ${user?.last_name}`;
+  const displayName = `${user?.name}`;
   const [searchFriends, setSearchFriends] = useState('');
 
   const handleSearchFriends = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {

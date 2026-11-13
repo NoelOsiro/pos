@@ -119,7 +119,7 @@ export function CustomerTableToolbar({ filters, options, onResetPage }: Props) {
                 <Checkbox
                   disableRipple
                   size="small"
-                  checked={currentFilters.role.includes(option)}
+                  checked={currentFilters.role?.includes(option)}
                 />
                 {option}
               </MenuItem>

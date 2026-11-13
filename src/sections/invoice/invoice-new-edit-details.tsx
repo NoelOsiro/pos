@@ -1,58 +1,50 @@
 import type { IInvoiceItem } from '@/types/invoice';
+import type { NewInvoiceSchemaType } from './invoice-new-edit-form';
+import type { Control } from 'react-hook-form';
 
 import { sumBy } from 'es-toolkit';
-import { useEffect, useCallback } from 'react';
-import { useFieldArray, useFormContext } from 'react-hook-form';
+import { useEffect } from 'react';
+import { useFieldArray, useFormContext, useWatch } from 'react-hook-form';
 
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
-import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 import InputAdornment from '@mui/material/InputAdornment';
 import { inputBaseClasses } from '@mui/material/InputBase';
-
-import { INVOICE_SERVICE_OPTIONS } from '@/_mock';
 
 import { Field } from '@/components/hook-form';
 import { Iconify } from '@/components/iconify';
 
 import { InvoiceTotalSummary } from './invoice-total-summary';
 
-// ----------------------------------------------------------------------
-
 export const defaultItem: Omit<IInvoiceItem, 'id'> = {
-  title: '',
-  description: '',
-  service: INVOICE_SERVICE_OPTIONS[0].name,
-  price: INVOICE_SERVICE_OPTIONS[0].price,
+  productId: '',
+  sku: '',
+  name: '',
   quantity: 1,
-  total: 0,
+  unitPrice: 0,
+  lineTotal: 0,
 };
 
-const getFieldNames = (index: number): Record<keyof typeof defaultItem, string> => ({
-  title: `items[${index}].title`,
-  description: `items[${index}].description`,
-  service: `items[${index}].service`,
-  quantity: `items[${index}].quantity`,
-  price: `items[${index}].price`,
-  total: `items[${index}].total`,
+const getFieldNames = (index: number) => ({
+  productId: `items.${index}.productId` as const,
+  sku: `items.${index}.sku` as const,
+  name: `items.${index}.name` as const,
+  quantity: `items.${index}.quantity` as const,
+  unitPrice: `items.${index}.unitPrice` as const,
+  lineTotal: `items.${index}.lineTotal` as const,
 });
 
 export function InvoiceNewEditDetails() {
-  const { control, setValue, getValues } = useFormContext();
-
+  const { control, setValue } = useFormContext<NewInvoiceSchemaType>();
   const { fields, append, remove } = useFieldArray({ control, name: 'items' });
-
-  const items = getValues('items');
-  const taxes = getValues('taxes');
-  const discount = getValues('discount');
-  const shipping = getValues('shipping');
-
-  const subtotal = sumBy(items, (item: IInvoiceItem) => item.quantity * item.price);
-  const subtotalWithTax = subtotal + subtotal * (taxes / 100);
-  const totalAmount = subtotalWithTax - discount - shipping;
+  const items = useWatch({ control, name: 'items' }) ?? [];
+  const tax = useWatch({ control, name: 'tax' }) ?? 0;
+  const discount = useWatch({ control, name: 'discount' }) ?? 0;
+  const subtotal = sumBy(items, (item) => item.quantity * item.unitPrice);
+  const totalAmount = subtotal + tax - discount;
 
   useEffect(() => {
     setValue('subtotal', subtotal);
@@ -69,6 +61,7 @@ export function InvoiceNewEditDetails() {
         {fields.map((item, index) => (
           <InvoiceItem
             key={item.id}
+            control={control}
             fieldNames={getFieldNames(index)}
             onRemoveItem={() => remove(index)}
           />
@@ -89,7 +82,7 @@ export function InvoiceNewEditDetails() {
           size="small"
           color="primary"
           startIcon={<Iconify icon="mingcute:add-line" />}
-          onClick={() => append(defaultItem)}
+          onClick={() => append({ ...defaultItem })}
           sx={{ flexShrink: 0 }}
         >
           Add Item
@@ -106,36 +99,26 @@ export function InvoiceNewEditDetails() {
         >
           <Field.Text
             size="small"
-            label="Shipping($)"
-            name="shipping"
+            label="Tax amount"
+            name="tax"
             type="number"
-            sx={{ maxWidth: { md: 120 } }}
+            sx={{ maxWidth: { md: 140 } }}
             slotProps={{ inputLabel: { shrink: true } }}
           />
 
           <Field.Text
             size="small"
-            label="Discount($)"
+            label="Discount"
             name="discount"
             type="number"
-            sx={{ maxWidth: { md: 120 } }}
-            slotProps={{ inputLabel: { shrink: true } }}
-          />
-
-          <Field.Text
-            size="small"
-            label="Taxes(%)"
-            name="taxes"
-            type="number"
-            sx={{ maxWidth: { md: 120 } }}
+            sx={{ maxWidth: { md: 140 } }}
             slotProps={{ inputLabel: { shrink: true } }}
           />
         </Box>
       </Box>
 
       <InvoiceTotalSummary
-        taxes={taxes}
-        shipping={shipping}
+        taxAmount={tax}
         subtotal={subtotal}
         discount={discount}
         totalAmount={totalAmount}
@@ -144,39 +127,20 @@ export function InvoiceNewEditDetails() {
   );
 }
 
-// ----------------------------------------------------------------------
-
 type InvoiceItemProps = {
+  control: Control<NewInvoiceSchemaType>;
   onRemoveItem: () => void;
-  fieldNames: Record<keyof typeof defaultItem, string>;
+  fieldNames: ReturnType<typeof getFieldNames>;
 };
 
-export function InvoiceItem({ onRemoveItem, fieldNames }: InvoiceItemProps) {
-  const { getValues, setValue } = useFormContext();
-
-  const priceInput = getValues(fieldNames.price);
-  const quantityInput = getValues(fieldNames.quantity);
+function InvoiceItem({ control, onRemoveItem, fieldNames }: InvoiceItemProps) {
+  const { setValue } = useFormContext<NewInvoiceSchemaType>();
+  const unitPrice = useWatch({ control, name: fieldNames.unitPrice }) ?? 0;
+  const quantity = useWatch({ control, name: fieldNames.quantity }) ?? 0;
 
   useEffect(() => {
-    const totalValue = Number((priceInput * quantityInput).toFixed(2));
-
-    setValue(fieldNames.total, totalValue);
-  }, [fieldNames.total, priceInput, quantityInput, setValue]);
-
-  const handleSelectService = useCallback(
-    (option: string) => {
-      const selectedService = INVOICE_SERVICE_OPTIONS.find((service) => service.name === option);
-
-      setValue(fieldNames.price, selectedService?.price);
-    },
-    [fieldNames.price, setValue]
-  );
-
-  const handleClearService = useCallback(() => {
-    setValue(fieldNames.quantity, defaultItem.quantity);
-    setValue(fieldNames.price, defaultItem.price);
-    setValue(fieldNames.total, defaultItem.total);
-  }, [fieldNames.price, fieldNames.quantity, fieldNames.total, setValue]);
+    setValue(fieldNames.lineTotal, Number((unitPrice * quantity).toFixed(2)));
+  }, [fieldNames.lineTotal, quantity, setValue, unitPrice]);
 
   return (
     <Box
@@ -195,66 +159,21 @@ export function InvoiceItem({ onRemoveItem, fieldNames }: InvoiceItemProps) {
           flexDirection: { xs: 'column', md: 'row' },
         }}
       >
-        <Field.Text
-          size="small"
-          name={fieldNames.title}
-          label="Title"
-          slotProps={{ inputLabel: { shrink: true } }}
-        />
-
-        <Field.Text
-          multiline
-          maxRows={3}
-          size="small"
-          name={fieldNames.description}
-          label="Description"
-          slotProps={{ inputLabel: { shrink: true } }}
-        />
-
-        <Field.Select
-          size="small"
-          name={fieldNames.service}
-          label="Service"
-          slotProps={{ inputLabel: { shrink: true } }}
-          sx={{ maxWidth: { md: 160 } }}
-        >
-          <MenuItem
-            value=""
-            onClick={handleClearService}
-            sx={{ fontStyle: 'italic', color: 'text.secondary' }}
-          >
-            None
-          </MenuItem>
-
-          <Divider sx={{ borderStyle: 'dashed' }} />
-
-          {INVOICE_SERVICE_OPTIONS.map((service) => (
-            <MenuItem
-              key={service.id}
-              value={service.name}
-              onClick={() => handleSelectService(service.name)}
-            >
-              {service.name}
-            </MenuItem>
-          ))}
-        </Field.Select>
-
+        <Field.Text size="small" name={fieldNames.productId} label="Product ID" />
+        <Field.Text size="small" name={fieldNames.sku} label="SKU" />
+        <Field.Text size="small" name={fieldNames.name} label="Product name" />
         <Field.Text
           size="small"
           type="number"
           name={fieldNames.quantity}
           label="Quantity"
-          placeholder="0"
-          slotProps={{ inputLabel: { shrink: true } }}
           sx={{ maxWidth: { md: 96 } }}
         />
-
         <Field.Text
           size="small"
           type="number"
-          name={fieldNames.price}
-          label="Price"
-          placeholder="0.00"
+          name={fieldNames.unitPrice}
+          label="Unit price"
           slotProps={{
             input: {
               startAdornment: (
@@ -264,16 +183,14 @@ export function InvoiceItem({ onRemoveItem, fieldNames }: InvoiceItemProps) {
               ),
             },
           }}
-          sx={{ maxWidth: { md: 96 } }}
+          sx={{ maxWidth: { md: 120 } }}
         />
-
         <Field.Text
           disabled
           size="small"
-          name={fieldNames.total}
+          name={fieldNames.lineTotal}
           type="number"
           label="Total"
-          placeholder="0.00"
           slotProps={{
             input: {
               startAdornment: (

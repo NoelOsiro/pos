@@ -115,10 +115,12 @@ export function InvoiceTableRow({
 
         <TableCell>
           <Box sx={{ gap: 2, display: 'flex', alignItems: 'center' }}>
-            <Avatar alt={row.invoiceTo.name}>{row.invoiceTo.name.charAt(0).toUpperCase()}</Avatar>
+            <Avatar alt={row.customerName}>
+              {row.customerName.charAt(0).toUpperCase()}
+            </Avatar>
 
             <ListItemText
-              primary={row.invoiceTo.name}
+              primary={row.customerName}
               secondary={
                 <Link component={RouterLink} href={detailsHref} color="inherit">
                   {row.invoiceNumber}
@@ -136,8 +138,8 @@ export function InvoiceTableRow({
 
         <TableCell>
           <ListItemText
-            primary={fDate(row.createDate)}
-            secondary={fTime(row.createDate)}
+            primary={fDate(row.createdAt)}
+            secondary={fTime(row.createdAt)}
             slotProps={{
               primary: { noWrap: true, sx: { typography: 'body2' } },
               secondary: { sx: { mt: 0.5, typography: 'caption' } },
@@ -158,7 +160,7 @@ export function InvoiceTableRow({
 
         <TableCell>{fCurrency(row.totalAmount)}</TableCell>
 
-        <TableCell align="center">{row.sent}</TableCell>
+        <TableCell align="center">{row.orderId || '—'}</TableCell>
 
         <TableCell>
           <Label

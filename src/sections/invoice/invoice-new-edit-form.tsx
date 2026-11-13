@@ -1,9 +1,12 @@
+'use client';
+
 import type { IInvoice } from '@/types/invoice';
 
 import { z as zod } from 'zod';
 import { useForm } from 'react-hook-form';
+import type { FieldError, Resolver } from 'react-hook-form';
 import { useBoolean } from 'minimal-shared/hooks';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { toNestErrors } from '@hookform/resolvers';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -12,9 +15,7 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import { paths } from '@/routes/paths';
 import { useRouter } from '@/routes/hooks';
 
-import { today, fIsAfter } from '@/utils/format-time';
-
-import { _addressBooks } from '@/_mock';
+import { today } from '@/utils/format-time';
 
 import { Form, schemaHelper } from '@/components/hook-form';
 
@@ -22,44 +23,49 @@ import { InvoiceNewEditAddress } from './invoice-new-edit-address';
 import { InvoiceNewEditStatusDate } from './invoice-new-edit-status-date';
 import { defaultItem, InvoiceNewEditDetails } from './invoice-new-edit-details';
 
-// ----------------------------------------------------------------------
+export const NewInvoiceSchema = zod.object({
+  customerId: zod.string().min(1, { message: 'Customer ID is required!' }),
+  customerName: zod.string().min(1, { message: 'Customer name is required!' }),
+  createdAt: schemaHelper.date({ message: { required: 'Create date is required!' } }),
+  dueDate: schemaHelper.date({ message: { required: 'Due date is required!' } }),
+  items: zod.array(
+    zod.object({
+      productId: zod.string(),
+      sku: zod.string(),
+      name: zod.string().min(1, { message: 'Product name is required!' }),
+      quantity: zod.number().int().positive(),
+      unitPrice: zod.number().nonnegative(),
+      lineTotal: zod.number().nonnegative(),
+    }),
+  ),
+  tax: zod.number().nonnegative(),
+  status: zod.string(),
+  discount: zod.number().nonnegative(),
+  subtotal: zod.number().nonnegative(),
+  totalAmount: zod.number().nonnegative(),
+  invoiceNumber: zod.string(),
+  orderId: zod.string().optional(),
+});
 
 export type NewInvoiceSchemaType = zod.infer<typeof NewInvoiceSchema>;
 
-export const NewInvoiceSchema = zod
-  .object({
-    invoiceTo: schemaHelper.nullableInput(zod.custom<IInvoice['invoiceTo']>(), {
-      message: 'Invoice to is required!',
-    }),
-    createDate: schemaHelper.date({ message: { required: 'Create date is required!' } }),
-    dueDate: schemaHelper.date({ message: { required: 'Due date is required!' } }),
-    items: zod.array(
-      zod.object({
-        title: zod.string().min(1, { message: 'Title is required!' }),
-        service: zod.string().min(1, { message: 'Service is required!' }),
-        quantity: zod.number().int().positive().min(1, { message: 'Quantity must be more than 0' }),
-        // Not required
-        price: zod.number(),
-        total: zod.number(),
-        description: zod.string(),
-      })
-    ),
-    // Not required
-    taxes: zod.number(),
-    status: zod.string(),
-    discount: zod.number(),
-    shipping: zod.number(),
-    subtotal: zod.number(),
-    totalAmount: zod.number(),
-    invoiceNumber: zod.string(),
-    invoiceFrom: zod.custom<IInvoice['invoiceFrom']>().nullable(),
-  })
-  .refine((data) => !fIsAfter(data.createDate, data.dueDate), {
-    message: 'Due date cannot be earlier than create date!',
-    path: ['dueDate'],
-  });
+const invoiceResolver: Resolver<NewInvoiceSchemaType> = async (values, _context, options) => {
+  const result = await NewInvoiceSchema.safeParseAsync(values);
 
-// ----------------------------------------------------------------------
+  if (result.success) {
+    return { values: result.data, errors: {} };
+  }
+
+  const fieldErrors = result.error.issues.reduce<Record<string, FieldError>>((errors, issue) => {
+    const path = issue.path.join('.');
+    if (!errors[path]) {
+      errors[path] = { type: issue.code, message: issue.message };
+    }
+    return errors;
+  }, {});
+
+  return { values: {}, errors: toNestErrors(fieldErrors, options) };
+};
 
 type Props = {
   currentInvoice?: IInvoice;
@@ -67,28 +73,27 @@ type Props = {
 
 export function InvoiceNewEditForm({ currentInvoice }: Props) {
   const router = useRouter();
-
   const loadingSave = useBoolean();
   const loadingSend = useBoolean();
 
   const defaultValues: NewInvoiceSchemaType = {
     invoiceNumber: 'INV-1990',
-    createDate: today(),
+    customerId: '',
+    customerName: '',
+    createdAt: today(),
     dueDate: null,
-    taxes: 0,
-    shipping: 0,
+    tax: 0,
     status: 'draft',
     discount: 0,
-    invoiceFrom: _addressBooks[0],
-    invoiceTo: null,
+    orderId: '',
     subtotal: 0,
     totalAmount: 0,
-    items: [defaultItem],
+    items: [{ ...defaultItem }],
   };
 
   const methods = useForm<NewInvoiceSchemaType>({
     mode: 'all',
-    resolver: zodResolver(NewInvoiceSchema),
+    resolver: invoiceResolver,
     defaultValues,
     values: currentInvoice,
   });
@@ -101,30 +106,28 @@ export function InvoiceNewEditForm({ currentInvoice }: Props) {
 
   const handleSaveAsDraft = handleSubmit(async (data) => {
     loadingSave.onTrue();
-
     try {
       await new Promise((resolve) => setTimeout(resolve, 500));
       reset();
-      loadingSave.onFalse();
       router.push(paths.dashboard.invoice.root);
       console.info('DATA', JSON.stringify(data, null, 2));
     } catch (error) {
       console.error(error);
+    } finally {
       loadingSave.onFalse();
     }
   });
 
   const handleCreateAndSend = handleSubmit(async (data) => {
     loadingSend.onTrue();
-
     try {
       await new Promise((resolve) => setTimeout(resolve, 500));
       reset();
-      loadingSend.onFalse();
       router.push(paths.dashboard.invoice.root);
       console.info('DATA', JSON.stringify(data, null, 2));
     } catch (error) {
       console.error(error);
+    } finally {
       loadingSend.onFalse();
     }
   });
@@ -133,20 +136,11 @@ export function InvoiceNewEditForm({ currentInvoice }: Props) {
     <Form methods={methods}>
       <Card>
         <InvoiceNewEditAddress />
-
         <InvoiceNewEditStatusDate />
-
         <InvoiceNewEditDetails />
       </Card>
 
-      <Box
-        sx={{
-          mt: 3,
-          gap: 2,
-          display: 'flex',
-          justifyContent: 'flex-end',
-        }}
-      >
+      <Box sx={{ mt: 3, gap: 2, display: 'flex', justifyContent: 'flex-end' }}>
         <LoadingButton
           color="inherit"
           size="large"
@@ -156,7 +150,6 @@ export function InvoiceNewEditForm({ currentInvoice }: Props) {
         >
           Save as draft
         </LoadingButton>
-
         <LoadingButton
           size="large"
           variant="contained"

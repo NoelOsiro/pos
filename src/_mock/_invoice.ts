@@ -1,10 +1,6 @@
 import { fSub, fAdd } from '@/utils/format-time';
 
 import { _mock } from './_mock';
-import { _tags } from './assets';
-import { _addressBooks } from './_others';
-
-// ----------------------------------------------------------------------
 
 export const INVOICE_STATUS_OPTIONS = [
   { value: 'paid', label: 'Paid' },
@@ -13,54 +9,45 @@ export const INVOICE_STATUS_OPTIONS = [
   { value: 'draft', label: 'Draft' },
 ];
 
-export const INVOICE_SERVICE_OPTIONS = Array.from({ length: 8 }, (_, index) => ({
-  id: _mock.id(index),
-  name: _tags[index],
-  price: _mock.number.price(index),
-}));
+const makeItems = (index: number) =>
+  Array.from({ length: 3 }, (_, itemIndex) => {
+    const quantity = _mock.number.nativeS(index + itemIndex);
+    const unitPrice = _mock.number.price(index + itemIndex);
 
-const ITEMS = Array.from({ length: 3 }, (__, index) => {
-  const total = INVOICE_SERVICE_OPTIONS[index].price * _mock.number.nativeS(index);
-
-  return {
-    id: _mock.id(index),
-    total,
-    title: _mock.productName(index),
-    description: _mock.sentence(index),
-    price: INVOICE_SERVICE_OPTIONS[index].price,
-    service: INVOICE_SERVICE_OPTIONS[index].name,
-    quantity: _mock.number.nativeS(index),
-  };
-});
+    return {
+      id: _mock.id(index * 3 + itemIndex),
+      productId: _mock.id(index * 3 + itemIndex + 50),
+      sku: `SKU-${index + 1}-${itemIndex + 1}`,
+      name: _mock.productName(index + itemIndex),
+      quantity,
+      unitPrice,
+      lineTotal: quantity * unitPrice,
+    };
+  });
 
 export const _invoices = Array.from({ length: 20 }, (_, index) => {
-  const taxes = _mock.number.price(index + 1);
-
+  const items = makeItems(index);
+  const tax = _mock.number.price(index + 1);
   const discount = _mock.number.price(index + 2);
-
-  const shipping = _mock.number.price(index + 3);
-
-  const subtotal = ITEMS.reduce((accumulator, item) => accumulator + item.price * item.quantity, 0);
-
-  const totalAmount = subtotal - shipping - discount + taxes;
-
+  const subtotal = items.reduce((total, item) => total + item.lineTotal, 0);
+  const totalAmount = subtotal + tax - discount;
   const status =
     (index % 2 && 'paid') || (index % 3 && 'pending') || (index % 4 && 'overdue') || 'draft';
 
   return {
     id: _mock.id(index),
-    taxes,
-    status,
-    discount,
-    shipping,
-    subtotal,
-    totalAmount,
-    items: ITEMS,
     invoiceNumber: `INV-199${index}`,
-    invoiceFrom: _addressBooks[index],
-    invoiceTo: _addressBooks[index + 1],
-    sent: _mock.number.nativeS(index),
-    createDate: fSub({ days: index }),
+    orderId: _mock.id(index + 100),
+    customerId: _mock.id(index + 200),
+    customerName: _mock.fullName(index),
+    status,
+    subtotal,
+    tax,
+    discount,
+    totalAmount,
     dueDate: fAdd({ days: index + 15, hours: index }),
+    paidDate: status === 'paid' ? fSub({ days: index }) : undefined,
+    createdAt: fSub({ days: index }),
+    items,
   };
 });

@@ -133,15 +133,15 @@ type InvoicePdfDocumentProps = {
 function InvoicePdfDocument({ invoice, currentStatus }: InvoicePdfDocumentProps) {
   const {
     items,
-    taxes,
+    tax,
     dueDate,
     discount,
-    shipping,
     subtotal,
-    invoiceTo,
-    createDate,
+    customerId,
+    customerName,
+    createdAt,
+    orderId,
     totalAmount,
-    invoiceFrom,
     invoiceNumber,
   } = invoice ?? {};
 
@@ -149,7 +149,11 @@ function InvoicePdfDocument({ invoice, currentStatus }: InvoicePdfDocumentProps)
 
   const renderHeader = () => (
     <View style={[styles.container, styles.mb40]}>
-      <Image source="/logo/logo-single.png" style={{ width: 48, height: 48 }} />
+      <Image
+        source="/logo/logo-single.png"
+        style={{ width: 48, height: 48 }}
+        alt="Invoice logo"
+      />
 
       <View style={{ alignItems: 'flex-end', flexDirection: 'column' }}>
         <Text style={[styles.h3, styles.mb8, { textTransform: 'capitalize' }]}>
@@ -178,17 +182,14 @@ function InvoicePdfDocument({ invoice, currentStatus }: InvoicePdfDocumentProps)
   const renderBillingInfo = () => (
     <View style={[styles.container, styles.mb40]}>
       <View style={{ width: '50%' }}>
-        <Text style={[styles.text1Bold, styles.mb4]}>Invoice from</Text>
-        <Text style={[styles.text2]}>{invoiceFrom?.name}</Text>
-        <Text style={[styles.text2]}>{invoiceFrom?.fullAddress}</Text>
-        <Text style={[styles.text2]}>{invoiceFrom?.phoneNumber}</Text>
+        <Text style={[styles.text1Bold, styles.mb4]}>Customer</Text>
+        <Text style={[styles.text2]}>{customerName}</Text>
+        <Text style={[styles.text2]}>Customer ID: {customerId}</Text>
       </View>
 
       <View style={{ width: '50%' }}>
-        <Text style={[styles.text1Bold, styles.mb4]}>Invoice to</Text>
-        <Text style={[styles.text2]}>{invoiceTo?.name}</Text>
-        <Text style={[styles.text2]}>{invoiceTo?.fullAddress}</Text>
-        <Text style={[styles.text2]}>{invoiceTo?.phoneNumber}</Text>
+        <Text style={[styles.text1Bold, styles.mb4]}>Related order</Text>
+        <Text style={[styles.text2]}>{orderId ?? '—'}</Text>
       </View>
     </View>
   );
@@ -197,7 +198,7 @@ function InvoicePdfDocument({ invoice, currentStatus }: InvoicePdfDocumentProps)
     <View style={[styles.container, styles.mb40]}>
       <View style={{ width: '50%' }}>
         <Text style={[styles.text1Bold, styles.mb4]}>Date create</Text>
-        <Text style={[styles.text2]}>{fDate(createDate)}</Text>
+        <Text style={[styles.text2]}>{fDate(createdAt)}</Text>
       </View>
       <View style={{ width: '50%' }}>
         <Text style={[styles.text1Bold, styles.mb4]}>Due date</Text>
@@ -238,26 +239,25 @@ function InvoicePdfDocument({ invoice, currentStatus }: InvoicePdfDocumentProps)
                 <Text>{index + 1}</Text>
               </View>
               <View style={styles.cell_2}>
-                <Text style={[styles.text2Bold]}>{item.title}</Text>
-                <Text style={[styles.text2]}>{item.description}</Text>
+                <Text style={[styles.text2Bold]}>{item.name}</Text>
+                <Text style={[styles.text2]}>SKU: {item.sku}</Text>
               </View>
               <View style={styles.cell_3}>
                 <Text style={[styles.text2]}>{item.quantity}</Text>
               </View>
               <View style={styles.cell_4}>
-                <Text style={[styles.text2]}>{item.price}</Text>
+                <Text style={[styles.text2]}>{fCurrency(item.unitPrice)}</Text>
               </View>
               <View style={[styles.cell_5, { textAlign: 'right' }]}>
-                <Text style={[styles.text2]}>{fCurrency(item.price * item.quantity)}</Text>
+                <Text style={[styles.text2]}>{fCurrency(item.lineTotal)}</Text>
               </View>
             </View>
           ))}
 
           {[
             { name: 'Subtotal', value: subtotal },
-            { name: 'Shipping', value: -(shipping ?? 0) },
             { name: 'Discount', value: -(discount ?? 0) },
-            { name: 'Taxes', value: taxes },
+            { name: 'Tax', value: tax },
             { name: 'Total', value: totalAmount, styles: styles.h4 },
           ].map((item) => (
             <View key={item.name} style={[styles.row, styles.noBorder]}>

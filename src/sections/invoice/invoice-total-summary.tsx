@@ -9,6 +9,7 @@ import { fPercent, fCurrency } from '@/utils/format-number';
 
 type InvoiceTotalSummaryProps = BoxProps & {
   taxes?: number;
+  taxAmount?: number;
   shipping?: number;
   subtotal?: number;
   discount?: number;
@@ -18,6 +19,7 @@ type InvoiceTotalSummaryProps = BoxProps & {
 export function InvoiceTotalSummary({
   sx,
   taxes,
+  taxAmount,
   shipping,
   subtotal,
   discount,
@@ -86,7 +88,7 @@ export function InvoiceTotalSummary({
           Taxes
         </Box>
         <Box component="span" sx={valueStyles}>
-          {taxes ? fPercent(taxes) : '-'}
+          {taxAmount != null ? fCurrency(taxAmount) : taxes ? fPercent(taxes) : '-'}
         </Box>
       </Box>
 

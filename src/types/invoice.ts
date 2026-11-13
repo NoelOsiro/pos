@@ -38,6 +38,8 @@ export type IInvoiceFilters = {
 };
 
 export type IInvoiceTableFilters = {
-  status: string[];
-  paymentStatus: string[];
+  name: string;
+  status: string;
+  startDate: IDatePickerControl;
+  endDate: IDatePickerControl;
 };

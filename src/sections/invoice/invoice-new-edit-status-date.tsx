@@ -42,7 +42,7 @@ export function InvoiceNewEditStatusDate() {
         ))}
       </Field.Select>
 
-      <Field.DatePicker name="createDate" label="Date create" />
+      <Field.DatePicker name="createdAt" label="Date create" />
       <Field.DatePicker name="dueDate" label="Due date" />
     </Box>
   );

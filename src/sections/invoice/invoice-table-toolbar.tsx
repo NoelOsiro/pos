@@ -1,21 +1,15 @@
 import type { IDatePickerControl } from '@/types/common';
 import type { IInvoiceTableFilters } from '@/types/invoice';
-import type { SelectChangeEvent } from '@mui/material/Select';
 import type { UseSetStateReturn } from 'minimal-shared/hooks';
 
 import { useCallback } from 'react';
 import { usePopover } from 'minimal-shared/hooks';
 
 import Box from '@mui/material/Box';
-import Select from '@mui/material/Select';
 import MenuList from '@mui/material/MenuList';
 import MenuItem from '@mui/material/MenuItem';
-import Checkbox from '@mui/material/Checkbox';
 import TextField from '@mui/material/TextField';
-import InputLabel from '@mui/material/InputLabel';
 import IconButton from '@mui/material/IconButton';
-import FormControl from '@mui/material/FormControl';
-import OutlinedInput from '@mui/material/OutlinedInput';
 import InputAdornment from '@mui/material/InputAdornment';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { formHelperTextClasses } from '@mui/material/FormHelperText';
@@ -29,12 +23,9 @@ type Props = {
   dateError: boolean;
   onResetPage: () => void;
   filters: UseSetStateReturn<IInvoiceTableFilters>;
-  options: {
-    services: string[];
-  };
 };
 
-export function InvoiceTableToolbar({ filters, options, dateError, onResetPage }: Props) {
+export function InvoiceTableToolbar({ filters, dateError, onResetPage }: Props) {
   const menuActions = usePopover();
 
   const { state: currentFilters, setState: updateFilters } = filters;
@@ -43,17 +34,6 @@ export function InvoiceTableToolbar({ filters, options, dateError, onResetPage }
     (event: React.ChangeEvent<HTMLInputElement>) => {
       onResetPage();
       updateFilters({ name: event.target.value });
-    },
-    [onResetPage, updateFilters]
-  );
-
-  const handleFilterService = useCallback(
-    (event: SelectChangeEvent<string[]>) => {
-      const newValue =
-        typeof event.target.value === 'string' ? event.target.value.split(',') : event.target.value;
-
-      onResetPage();
-      updateFilters({ service: newValue });
     },
     [onResetPage, updateFilters]
   );
@@ -112,38 +92,9 @@ export function InvoiceTableToolbar({ filters, options, dateError, onResetPage }
           alignItems: { xs: 'flex-end', md: 'center' },
         }}
       >
-        <FormControl sx={{ flexShrink: 0, width: { xs: 1, md: 180 } }}>
-          <InputLabel htmlFor="filter-service-select">Service</InputLabel>
-
-          <Select
-            multiple
-            value={currentFilters.service}
-            onChange={handleFilterService}
-            input={<OutlinedInput label="Service" />}
-            renderValue={(selected) => selected.map((value) => value).join(', ')}
-            inputProps={{ id: 'filter-service-select' }}
-            sx={{ textTransform: 'capitalize' }}
-          >
-            {options.services.map((option) => (
-              <MenuItem key={option} value={option}>
-                <Checkbox
-                  disableRipple
-                  size="small"
-                  checked={currentFilters.service.includes(option)}
-                  inputProps={{
-                    id: `${option}-checkbox`,
-                    'aria-label': `${option} checkbox`,
-                  }}
-                />
-                {option}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
         <DatePicker
           label="Start date"
-          value={currentFilters.endDate}
+          value={currentFilters.startDate}
           onChange={handleFilterStartDate}
           slotProps={{ textField: { fullWidth: true } }}
           sx={{ maxWidth: { md: 180 } }}
