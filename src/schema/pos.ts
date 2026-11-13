@@ -8,6 +8,7 @@ import {
   boolean,
   jsonb,
   unique,
+  uniqueIndex,
   index,
 } from "drizzle-orm/pg-core";
 
@@ -82,7 +83,10 @@ export const categories = pgTable("categories", {
 
 export const products = pgTable("products", {
   id: varchar("id", { length: 255 }).primaryKey(),
-  sku: text("sku").notNull().unique(),
+  shopId: varchar("shop_id", { length: 255 }).references(() => shops.id, {
+    onDelete: "cascade",
+  }),
+  sku: text("sku").notNull(),
   name: text("name").notNull(),
   categoryId: varchar("category_id", { length: 255 }),
   price: numeric("price", { precision: 12, scale: 2 }).notNull(),
@@ -94,7 +98,10 @@ export const products = pgTable("products", {
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  uniqueIndex("products_shop_sku_key").on(table.shopId, table.sku),
+  index("products_shop_id_idx").on(table.shopId),
+]);
 
 export const customers = pgTable("customers", {
   id: varchar("id", { length: 255 }).primaryKey(),

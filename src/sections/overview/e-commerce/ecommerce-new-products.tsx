@@ -8,6 +8,8 @@ import Card from '@mui/material/Card';
 import Link from '@mui/material/Link';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
+import Stack from '@mui/material/Stack';
+import { Iconify } from '@/components/iconify';
 
 import { Image } from '@/components/image';
 import { Carousel, useCarousel, CarouselDotButtons } from '@/components/carousel';
@@ -19,6 +21,7 @@ type Props = CardProps & {
     id: string;
     name: string;
     coverUrl: string;
+    href?: string;
   }[];
 };
 
@@ -27,23 +30,39 @@ export function EcommerceNewProducts({ list, sx, ...other }: Props) {
 
   return (
     <Card sx={[{ bgcolor: 'common.black' }, ...(Array.isArray(sx) ? sx : [sx])]} {...other}>
-      <CarouselDotButtons
-        scrollSnaps={carousel.dots.scrollSnaps}
-        selectedIndex={carousel.dots.selectedIndex}
-        onClickDot={carousel.dots.onClickDot}
-        sx={{
-          right: 20,
-          bottom: 20,
-          position: 'absolute',
-          color: 'primary.light',
-        }}
-      />
+      {list.length ? (
+        <>
+          <CarouselDotButtons
+            scrollSnaps={carousel.dots.scrollSnaps}
+            selectedIndex={carousel.dots.selectedIndex}
+            onClickDot={carousel.dots.onClickDot}
+            sx={{
+              right: 20,
+              bottom: 20,
+              position: 'absolute',
+              color: 'primary.light',
+            }}
+          />
 
-      <Carousel carousel={carousel}>
-        {list.map((item) => (
-          <CarouselItem key={item.id} item={item} />
-        ))}
-      </Carousel>
+          <Carousel carousel={carousel}>
+            {list.map((item) => (
+              <CarouselItem key={item.id} item={item} />
+            ))}
+          </Carousel>
+        </>
+      ) : (
+        <Stack
+          sx={{
+            height: { xs: 288, xl: 320 },
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'common.white',
+          }}
+        >
+          <Iconify icon="solar:box-minimalistic-bold-duotone" width={48} />
+          <Typography sx={{ mt: 1 }}>No products yet</Typography>
+        </Stack>
+      )}
     </Card>
   );
 }
@@ -74,12 +93,12 @@ function CarouselItem({ item, ...other }: CarouselItemProps) {
           New
         </Typography>
 
-        <Link color="inherit" underline="none" variant="h5" noWrap sx={{ mt: 1, mb: 3 }}>
+        <Link href={item.href} color="inherit" underline="none" variant="h5" noWrap sx={{ mt: 1, mb: 3 }}>
           {item.name}
         </Link>
 
-        <Button color="primary" variant="contained" sx={{ alignSelf: 'flex-start' }}>
-          Buy now
+        <Button href={item.href} color="primary" variant="contained" sx={{ alignSelf: 'flex-start' }}>
+          {item.href ? 'View product' : 'Buy now'}
         </Button>
       </Box>
 

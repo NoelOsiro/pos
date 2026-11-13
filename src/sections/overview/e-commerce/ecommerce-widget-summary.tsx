@@ -7,7 +7,7 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import { useTheme } from '@mui/material/styles';
 
-import { fNumber, fPercent } from '@/utils/format-number';
+import { fCurrency, fNumber, fPercent } from '@/utils/format-number';
 
 import { Iconify } from '@/components/iconify';
 import { Chart, useChart } from '@/components/chart';
@@ -17,7 +17,9 @@ import { Chart, useChart } from '@/components/chart';
 type Props = CardProps & {
   title: string;
   total: number;
-  percent: number;
+  percent?: number;
+  comparisonLabel?: string;
+  format?: 'number' | 'currency';
   chart: {
     colors?: string[];
     categories: string[];
@@ -26,8 +28,18 @@ type Props = CardProps & {
   };
 };
 
-export function EcommerceWidgetSummary({ title, percent, total, chart, sx, ...other }: Props) {
+export function EcommerceWidgetSummary({
+  title,
+  percent,
+  comparisonLabel,
+  format = 'number',
+  total,
+  chart,
+  sx,
+  ...other
+}: Props) {
   const theme = useTheme();
+  const isTrendingDown = (percent ?? 0) < 0;
 
   const chartColors = chart.colors ?? [theme.palette.primary.light, theme.palette.primary.main];
 
@@ -58,7 +70,11 @@ export function EcommerceWidgetSummary({ title, percent, total, chart, sx, ...ot
     ...chart.options,
   });
 
-  const renderTrending = () => (
+  const renderTrending = () => percent == null ? (
+    <Box component="span" sx={{ color: 'text.secondary', typography: 'body2' }}>
+      {comparisonLabel}
+    </Box>
+  ) : (
     <Box sx={{ gap: 0.5, display: 'flex', alignItems: 'center' }}>
       <Box
         component="span"
@@ -75,7 +91,7 @@ export function EcommerceWidgetSummary({ title, percent, total, chart, sx, ...ot
           ...theme.applyStyles('dark', {
             color: 'success.light',
           }),
-          ...(percent < 0 && {
+          ...(isTrendingDown && {
             bgcolor: varAlpha(theme.vars.palette.error.mainChannel, 0.16),
             color: 'error.dark',
             ...theme.applyStyles('dark', {
@@ -86,7 +102,7 @@ export function EcommerceWidgetSummary({ title, percent, total, chart, sx, ...ot
       >
         <Iconify
           width={16}
-          icon={percent < 0 ? 'eva:trending-down-fill' : 'eva:trending-up-fill'}
+          icon={isTrendingDown ? 'eva:trending-down-fill' : 'eva:trending-up-fill'}
         />
       </Box>
 
@@ -96,7 +112,7 @@ export function EcommerceWidgetSummary({ title, percent, total, chart, sx, ...ot
       </Box>
 
       <Box component="span" sx={{ color: 'text.secondary', typography: 'body2' }}>
-        last week
+        {comparisonLabel ?? 'last week'}
       </Box>
     </Box>
   );
@@ -109,7 +125,9 @@ export function EcommerceWidgetSummary({ title, percent, total, chart, sx, ...ot
       <Box sx={{ flexGrow: 1 }}>
         <Box sx={{ typography: 'subtitle2' }}>{title}</Box>
 
-        <Box sx={{ my: 1.5, typography: 'h3' }}>{fNumber(total)}</Box>
+        <Box sx={{ my: 1.5, typography: 'h3' }}>
+          {format === 'currency' ? fCurrency(total) : fNumber(total)}
+        </Box>
 
         {renderTrending()}
       </Box>

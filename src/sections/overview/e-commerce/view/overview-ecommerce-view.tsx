@@ -1,19 +1,16 @@
 'use client';
 
+import { useEffect } from 'react';
+
 import Grid from '@mui/material/Grid2';
 import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';
 
 import { DashboardContent } from '@/layouts/dashboard';
 import { MotivationIllustration } from '@/assets/illustrations';
-import {
-  _ecommerceNewProducts,
-  _ecommerceBestSalesman,
-  _ecommerceSalesOverview,
-  _ecommerceLatestProducts,
-} from '@/_mock';
-
-import { useAuthContext, useMockedUser } from '@/auth/hooks';
+import { useDashStore } from '@/store/dashboardStore';
+import { paths } from '@/routes/paths';
+import type { PosDashboardData } from '@/types/dashboard';
 
 import { EcommerceWelcome } from '../ecommerce-welcome';
 import { EcommerceNewProducts } from '../ecommerce-new-products';
@@ -27,126 +24,113 @@ import { EcommerceCurrentBalance } from '../ecommerce-current-balance';
 
 // ----------------------------------------------------------------------
 
-export function OverviewEcommerceView() {
-  const { user } = useAuthContext();
+type Props = {
+  initialData: PosDashboardData;
+};
 
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+export function OverviewEcommerceView({ initialData }: Props) {
   const theme = useTheme();
+  const storedDashboard = useDashStore((state) => state.posDashboard);
+  const setPosDashboard = useDashStore((state) => state.setPosDashboard);
+  const dashboardData =
+    storedDashboard?.snapshotId === initialData.snapshotId ? storedDashboard : initialData;
+  const totalSales = dashboardData.summary.grossSales;
+  const salesShare = (value: number) => (totalSales ? (value / totalSales) * 100 : 0);
+
+  useEffect(() => {
+    setPosDashboard(initialData);
+  }, [initialData, setPosDashboard]);
 
   return (
     <DashboardContent maxWidth="xl">
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 8 }}>
           <EcommerceWelcome
-            title={`Congratulations 🎉  \n ${user?.name}`}
-            description="Best seller of the month you have done 57.6% more sales today."
+            title={`Welcome to ${dashboardData.shopName}\n${dashboardData.userName || 'Your POS dashboard'}`}
+            description={`Signed in as ${dashboardData.role}. Review your shop's inventory and completed sales.`}
             img={<MotivationIllustration hideBackground />}
             action={
-              <Button variant="contained" color="primary">
-                Go now
+              <Button href={paths.dashboard.inventory.list} variant="contained" color="primary">
+                Manage inventory
               </Button>
             }
           />
         </Grid>
 
         <Grid size={{ xs: 12, md: 4 }}>
-          <EcommerceNewProducts list={_ecommerceNewProducts} />
+          <EcommerceNewProducts
+            list={dashboardData.latestProducts.slice(0, 3).map((product) => ({
+              ...product,
+              href: paths.dashboard.inventory.details(product.id),
+            }))}
+          />
         </Grid>
 
         <Grid size={{ xs: 12, md: 4 }}>
           <EcommerceWidgetSummary
-            title="Product sold"
-            percent={2.6}
-            total={765}
+            title="Items sold"
+            total={dashboardData.summary.itemsSold}
+            comparisonLabel="Completed sales"
             chart={{
-              categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-              series: [22, 8, 35, 50, 82, 84, 77, 12],
+              categories: MONTHS,
+              series: dashboardData.monthly.itemsSold,
             }}
           />
         </Grid>
 
         <Grid size={{ xs: 12, md: 4 }}>
           <EcommerceWidgetSummary
-            title="Total balance"
-            percent={-0.1}
-            total={18765}
+            title="Gross product sales"
+            total={dashboardData.summary.grossSales}
+            format="currency"
+            comparisonLabel="Monthly trend this year"
             chart={{
               colors: [theme.palette.warning.light, theme.palette.warning.main],
-              categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-              series: [56, 47, 40, 62, 73, 30, 23, 54],
+              categories: MONTHS,
+              series: dashboardData.monthly.revenue,
             }}
           />
         </Grid>
 
         <Grid size={{ xs: 12, md: 4 }}>
           <EcommerceWidgetSummary
-            title="Sales profit"
-            percent={0.6}
-            total={4876}
+            title="Completed orders"
+            total={dashboardData.summary.completedOrders}
+            comparisonLabel="Completed orders"
             chart={{
               colors: [theme.palette.error.light, theme.palette.error.main],
-              categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-              series: [40, 70, 75, 70, 50, 28, 7, 64],
+              categories: MONTHS,
+              series: dashboardData.monthly.orders,
             }}
           />
         </Grid>
 
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           <EcommerceSaleByGender
-            title="Sale by gender"
-            total={2324}
+            title="Sales by category"
+            subheader="Share of year-to-date units sold"
+            total={dashboardData.summary.yearItemsSold}
             chart={{
-              series: [
-                { label: 'Mens', value: 25 },
-                { label: 'Womens', value: 50 },
-                { label: 'Kids', value: 75 },
-              ],
+              series: dashboardData.categorySales.map((item) => item),
             }}
           />
         </Grid>
 
         <Grid size={{ xs: 12, md: 6, lg: 8 }}>
           <EcommerceYearlySales
-            title="Yearly sales"
-            subheader="(+43%) than last year"
+            title="Sales this year"
+            subheader="Monthly gross product sales from completed orders"
             chart={{
-              categories: [
-                'Jan',
-                'Feb',
-                'Mar',
-                'Apr',
-                'May',
-                'Jun',
-                'Jul',
-                'Aug',
-                'Sep',
-                'Oct',
-                'Nov',
-                'Dec',
-              ],
+              categories: MONTHS,
               series: [
                 {
-                  name: '2022',
+                  name: String(new Date(dashboardData.fetchedAt).getUTCFullYear()),
                   data: [
                     {
-                      name: 'Total income',
-                      data: [10, 41, 35, 51, 49, 62, 69, 91, 148, 35, 51, 49],
-                    },
-                    {
-                      name: 'Total expenses',
-                      data: [10, 34, 13, 56, 77, 88, 99, 77, 45, 13, 56, 77],
-                    },
-                  ],
-                },
-                {
-                  name: '2023',
-                  data: [
-                    {
-                      name: 'Total income',
-                      data: [51, 35, 41, 10, 91, 69, 62, 148, 91, 69, 62, 49],
-                    },
-                    {
-                      name: 'Total expenses',
-                      data: [56, 13, 34, 10, 77, 99, 88, 45, 77, 99, 88, 77],
+                      name: 'Gross product sales',
+                      data: dashboardData.monthly.revenue,
                     },
                   ],
                 },
@@ -156,35 +140,80 @@ export function OverviewEcommerceView() {
         </Grid>
 
         <Grid size={{ xs: 12, md: 6, lg: 8 }}>
-          <EcommerceSalesOverview title="Sales overview" data={_ecommerceSalesOverview} />
+          <EcommerceSalesOverview
+            title="Sales overview"
+            subheader="Share of all-time gross product sales"
+            data={[
+              {
+                label: 'All-time sales',
+                totalAmount: totalSales,
+                value: salesShare(totalSales),
+                format: 'currency',
+              },
+              {
+                label: 'Sales this year',
+                totalAmount: dashboardData.summary.yearRevenue,
+                value: salesShare(dashboardData.summary.yearRevenue),
+                format: 'currency',
+              },
+              {
+                label: 'Sales today',
+                totalAmount: dashboardData.summary.todayRevenue,
+                value: salesShare(dashboardData.summary.todayRevenue),
+                format: 'currency',
+              },
+            ]}
+          />
         </Grid>
 
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           <EcommerceCurrentBalance
-            title="Current balance"
-            earning={25500}
-            refunded={1600}
-            orderTotal={287650}
-            currentBalance={187650}
+            title="Estimated inventory retail value"
+            currentBalance={dashboardData.summary.retailValue}
+            rows={[
+              { label: 'Products', value: dashboardData.summary.productCount, format: 'number' },
+              { label: 'Units in stock', value: dashboardData.summary.stockUnits, format: 'number' },
+              { label: 'Low-stock products', value: dashboardData.summary.lowStockProducts, format: 'number' },
+            ]}
+            primaryAction={{ label: 'Inventory', href: paths.dashboard.inventory.list }}
+            secondaryAction={{ label: 'Orders', href: paths.dashboard.order.root }}
           />
         </Grid>
 
         <Grid size={{ xs: 12, md: 6, lg: 8 }}>
           <EcommerceBestSalesman
-            title="Best salesman"
-            tableData={_ecommerceBestSalesman}
+            title={dashboardData.role === 'cashier' ? 'My sales' : 'Top staff by product sales'}
+            showCountry={false}
+            tableData={dashboardData.sellers.map((seller) => ({
+              id: seller.id,
+              name: seller.name,
+              rank: seller.rank,
+              email: seller.email,
+              category: seller.role,
+              avatarUrl: seller.avatarUrl,
+              countryCode: '',
+              totalAmount: seller.sales,
+              orders: seller.orders,
+            }))}
             headCells={[
               { id: 'name', label: 'Seller' },
-              { id: 'category', label: 'Product' },
-              { id: 'country', label: 'Country', align: 'center' },
-              { id: 'totalAmount', label: 'Total', align: 'right' },
+              { id: 'category', label: 'Role' },
+              { id: 'orders', label: 'Completed orders', align: 'center' },
+              { id: 'totalAmount', label: 'Sales', align: 'right' },
               { id: 'rank', label: 'Rank', align: 'right' },
             ]}
           />
         </Grid>
 
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          <EcommerceLatestProducts title="Latest products" list={_ecommerceLatestProducts} />
+          <EcommerceLatestProducts
+            title="Latest products"
+            list={dashboardData.latestProducts.map((product) => ({
+              ...product,
+              priceSale: 0,
+              colors: [],
+            }))}
+          />
         </Grid>
       </Grid>
     </DashboardContent>

@@ -56,6 +56,10 @@ export type ProductFormValues = {
   isActive: boolean;
 };
 
+export type ProductCsvRow = Omit<ProductFormValues, 'categoryId'> & {
+  category: string;
+};
+
 export type IProductFilters = {
   name: string;
   category: string;

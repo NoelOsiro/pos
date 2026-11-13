@@ -7,7 +7,7 @@ import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import LinearProgress from '@mui/material/LinearProgress';
 
-import { fPercent, fCurrency } from '@/utils/format-number';
+import { fCurrency, fNumber, fPercent } from '@/utils/format-number';
 
 // ----------------------------------------------------------------------
 
@@ -18,6 +18,7 @@ type Props = CardProps & {
     label: string;
     value: number;
     totalAmount: number;
+    format?: 'number' | 'currency';
   }[];
 };
 
@@ -65,7 +66,9 @@ function Item({ progress }: ItemProps) {
           {progress.label}
         </Box>
 
-        <Box component="span">{fCurrency(progress.totalAmount)}</Box>
+        <Box component="span">
+          {progress.format === 'number' ? fNumber(progress.totalAmount) : fCurrency(progress.totalAmount)}
+        </Box>
 
         <Box component="span" sx={{ typography: 'body2', color: 'text.secondary' }}>
           ({fPercent(progress.value)})

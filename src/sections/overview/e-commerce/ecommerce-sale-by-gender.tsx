@@ -3,9 +3,11 @@ import type { ChartOptions } from '@/components/chart';
 
 import { varAlpha } from 'minimal-shared/utils';
 
+import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Divider from '@mui/material/Divider';
 import CardHeader from '@mui/material/CardHeader';
+import Typography from '@mui/material/Typography';
 import { useTheme, alpha as hexAlpha } from '@mui/material/styles';
 
 import { fNumber } from '@/utils/format-number';
@@ -37,6 +39,7 @@ export function EcommerceSaleByGender({ title, subheader, total, chart, sx, ...o
     [theme.palette.primary.light, theme.palette.primary.main],
     [hexAlpha(theme.palette.warning.light, 0.8), hexAlpha(theme.palette.warning.main, 0.8)],
     [hexAlpha(theme.palette.error.light, 0.8), hexAlpha(theme.palette.error.main, 0.8)],
+    [hexAlpha(theme.palette.info.light, 0.8), hexAlpha(theme.palette.info.main, 0.8)],
   ];
 
   const chartOptions = useChart({
@@ -72,18 +75,31 @@ export function EcommerceSaleByGender({ title, subheader, total, chart, sx, ...o
     <Card sx={sx} {...other}>
       <CardHeader title={title} subheader={subheader} />
 
-      <Chart
-        type="radialBar"
-        series={chartSeries}
-        options={chartOptions}
-        slotProps={{ loading: { p: 4 } }}
-        sx={{
-          my: 1.5,
-          mx: 'auto',
-          width: { xs: 300, xl: 320 },
-          height: { xs: 300, xl: 320 },
-        }}
-      />
+      {chartSeries.length ? (
+        <Chart
+          type="radialBar"
+          series={chartSeries}
+          options={chartOptions}
+          slotProps={{ loading: { p: 4 } }}
+          sx={{
+            my: 1.5,
+            mx: 'auto',
+            width: { xs: 300, xl: 320 },
+            height: { xs: 300, xl: 320 },
+          }}
+        />
+      ) : (
+        <Box
+          sx={{
+            height: 320,
+            display: 'grid',
+            placeItems: 'center',
+            color: 'text.secondary',
+          }}
+        >
+          <Typography variant="body2">No completed sales this year</Typography>
+        </Box>
+      )}
 
       <Divider sx={{ borderStyle: 'dashed' }} />
 

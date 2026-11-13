@@ -9,8 +9,10 @@ import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import TableBody from '@mui/material/TableBody';
 import CardHeader from '@mui/material/CardHeader';
+import Typography from '@mui/material/Typography';
 
 import { fCurrency } from '@/utils/format-number';
+import { fNumber } from '@/utils/format-number';
 
 import { Label } from '@/components/label';
 import { FlagIcon } from '@/components/flag-icon';
@@ -22,6 +24,7 @@ import { TableHeadCustom } from '@/components/table';
 type Props = CardProps & {
   title?: string;
   subheader?: string;
+  showCountry?: boolean;
   headCells: TableHeadCellProps[];
   tableData: {
     id: string;
@@ -32,12 +35,14 @@ type Props = CardProps & {
     avatarUrl: string;
     countryCode: string;
     totalAmount: number;
+    orders?: number;
   }[];
 };
 
 export function EcommerceBestSalesman({
   title,
   subheader,
+  showCountry = true,
   tableData,
   headCells,
   sx,
@@ -53,8 +58,17 @@ export function EcommerceBestSalesman({
 
           <TableBody>
             {tableData.map((row) => (
-              <RowItem key={row.id} row={row} />
+              <RowItem key={row.id} row={row} showCountry={showCountry} />
             ))}
+            {!tableData.length && (
+              <TableRow>
+                <TableCell colSpan={headCells.length} align="center" sx={{ py: 8 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    No completed sales yet.
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </Scrollbar>
@@ -66,9 +80,10 @@ export function EcommerceBestSalesman({
 
 type RowItemProps = {
   row: Props['tableData'][number];
+  showCountry: boolean;
 };
 
-function RowItem({ row }: RowItemProps) {
+function RowItem({ row, showCountry }: RowItemProps) {
   return (
     <TableRow>
       <TableCell>
@@ -80,9 +95,13 @@ function RowItem({ row }: RowItemProps) {
 
       <TableCell>{row.category}</TableCell>
 
-      <TableCell align="center">
-        <FlagIcon code={row.countryCode} />
-      </TableCell>
+      {showCountry ? (
+        <TableCell align="center">
+          <FlagIcon code={row.countryCode} />
+        </TableCell>
+      ) : (
+        <TableCell align="center">{fNumber(row.orders ?? 0)}</TableCell>
+      )}
 
       <TableCell align="right">{fCurrency(row.totalAmount)}</TableCell>
 

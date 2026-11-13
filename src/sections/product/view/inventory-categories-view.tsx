@@ -13,16 +13,13 @@ import { toast } from '@/components/snackbar';
 import { createInventoryCategoryAction } from '@/app/dashboard/inventory/actions';
 
 import Card from '@mui/material/Card';
+import Grid from '@mui/material/Grid2';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import Table from '@mui/material/Table';
-import TableRow from '@mui/material/TableRow';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableHead from '@mui/material/TableHead';
 import TextField from '@mui/material/TextField';
-import TableContainer from '@mui/material/TableContainer';
+import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+import { Iconify } from '@/components/iconify';
 
 type Props = {
   categories: ICategoryItem[];
@@ -34,6 +31,16 @@ export function InventoryCategoriesView({ categories, canManage }: Props) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [search, setSearch] = useState('');
+  const filteredCategories = categories.filter((category) => {
+    const query = search.trim().toLowerCase();
+    return (
+      !query ||
+      category.name.toLowerCase().includes(query) ||
+      category.slug.toLowerCase().includes(query) ||
+      (category.description ?? '').toLowerCase().includes(query)
+    );
+  });
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -98,42 +105,80 @@ export function InventoryCategoriesView({ categories, canManage }: Props) {
         </Card>
       )}
 
-      <Card>
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Category</TableCell>
-                <TableCell>Description</TableCell>
-                <TableCell align="right">Products</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {categories.map((category) => (
-                <TableRow key={category.id}>
-                  <TableCell>
-                    <Typography variant="subtitle2">{category.name}</Typography>
+      <TextField
+        value={search}
+        onChange={(event) => setSearch(event.target.value)}
+        placeholder="Search categories..."
+        aria-label="Search categories"
+        sx={{ mb: 3, width: { xs: 1, sm: 360 } }}
+        InputProps={{
+          startAdornment: (
+            <Box sx={{ display: 'flex', mr: 1, color: 'text.disabled' }}>
+              <Iconify icon="eva:search-fill" />
+            </Box>
+          ),
+        }}
+      />
+
+      {filteredCategories.length ? (
+        <Grid container spacing={3}>
+          {filteredCategories.map((category) => (
+            <Grid key={category.id} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+              <Card sx={{ p: 3, height: 1 }}>
+                <Stack spacing={2} sx={{ height: 1 }}>
+                  <Box
+                    sx={{
+                      width: 48,
+                      height: 48,
+                      display: 'grid',
+                      placeItems: 'center',
+                      borderRadius: 1.5,
+                      bgcolor: 'primary.lighter',
+                      color: 'primary.main',
+                    }}
+                  >
+                    <Iconify icon="solar:widget-5-bold-duotone" width={28} />
+                  </Box>
+                  <Box sx={{ flexGrow: 1 }}>
+                    <Typography variant="h6">{category.name}</Typography>
                     <Typography variant="caption" color="text.secondary">
                       {category.slug}
                     </Typography>
-                  </TableCell>
-                  <TableCell>{category.description || '—'}</TableCell>
-                  <TableCell align="right">{category.productCount ?? 0}</TableCell>
-                </TableRow>
-              ))}
-              {!categories.length && (
-                <TableRow>
-                  <TableCell colSpan={3} align="center" sx={{ py: 6 }}>
-                    <Typography variant="body2" color="text.secondary">
-                      No categories have been created.
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{
+                        mt: 1,
+                        minHeight: 40,
+                        display: '-webkit-box',
+                        overflow: 'hidden',
+                        WebkitBoxOrient: 'vertical',
+                        WebkitLineClamp: 2,
+                      }}
+                    >
+                      {category.description || 'No description'}
                     </Typography>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Card>
+                  </Box>
+                  <Stack direction="row" alignItems="center" justifyContent="space-between">
+                    <Typography variant="body2" color="text.secondary">
+                      Products
+                    </Typography>
+                    <Typography variant="subtitle2">{category.productCount ?? 0}</Typography>
+                  </Stack>
+                </Stack>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      ) : (
+        <Card sx={{ p: 6, textAlign: 'center' }}>
+          <Typography variant="body2" color="text.secondary">
+            {categories.length
+              ? 'No categories match your search.'
+              : 'No categories have been created.'}
+          </Typography>
+        </Card>
+      )}
     </DashboardContent>
   );
 }

@@ -33,7 +33,10 @@ type Props = CardProps & {
 export function EcommerceYearlySales({ title, subheader, chart, sx, ...other }: Props) {
   const theme = useTheme();
 
-  const [selectedSeries, setSelectedSeries] = useState('2023');
+  const [selectedSeries, setSelectedSeries] = useState(chart.series[0]?.name ?? '');
+  const activeSeriesName = chart.series.some((item) => item.name === selectedSeries)
+    ? selectedSeries
+    : chart.series[0]?.name ?? '';
 
   const chartColors = chart.colors ?? [theme.palette.primary.main, theme.palette.warning.main];
 
@@ -47,7 +50,7 @@ export function EcommerceYearlySales({ title, subheader, chart, sx, ...other }: 
     setSelectedSeries(newValue);
   }, []);
 
-  const currentSeries = chart.series.find((i) => i.name === selectedSeries);
+  const currentSeries = chart.series.find((item) => item.name === activeSeriesName);
 
   return (
     <Card sx={sx} {...other}>
@@ -57,7 +60,7 @@ export function EcommerceYearlySales({ title, subheader, chart, sx, ...other }: 
         action={
           <ChartSelect
             options={chart.series.map((item) => item.name)}
-            value={selectedSeries}
+            value={activeSeriesName}
             onChange={handleChangeSeries}
           />
         }
@@ -66,8 +69,12 @@ export function EcommerceYearlySales({ title, subheader, chart, sx, ...other }: 
 
       <ChartLegends
         colors={chartOptions?.colors}
-        labels={chart.series[0].data.map((item) => item.name)}
-        values={[fShortenNumber(1234), fShortenNumber(6789)]}
+        labels={currentSeries?.data.map((item) => item.name) ?? []}
+        values={
+          currentSeries?.data.map((item) =>
+            fShortenNumber(item.data.reduce((total, value) => total + value, 0)),
+          ) ?? []
+        }
         sx={{ px: 3, gap: 3 }}
       />
 
