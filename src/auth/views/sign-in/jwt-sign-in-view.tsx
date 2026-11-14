@@ -15,10 +15,12 @@ import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import InputAdornment from '@mui/material/InputAdornment';
 
+import { authClient } from '@/lib/auth/client';
 import { useAuthContext } from '../../hooks/use-auth-context';
 
 // ----------------------------------------------------------------------
@@ -46,6 +48,7 @@ export function JwtSignInView() {
   const { signIn } = useAuthContext();
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const returnTo = searchParams.get('returnTo');
 
@@ -74,6 +77,23 @@ export function JwtSignInView() {
     }
   });
 
+  const onGoogleSignIn = async () => {
+    setErrorMessage(null);
+    setIsGoogleLoading(true);
+
+    try {
+      const { error } = await authClient.signIn.social({
+        provider: 'google',
+        callbackURL: paths.dashboard.root,
+      });
+
+      if (error) throw new Error(error.message || 'Google sign-in failed');
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Google sign-in failed');
+      setIsGoogleLoading(false);
+    }
+  };
+
   return (
     <>
       <Box sx={{ textAlign: { xs: 'center', md: 'left' } }}>
@@ -93,6 +113,21 @@ export function JwtSignInView() {
           {errorMessage}
         </Alert>
       )}
+
+      <Button
+        fullWidth
+        color="inherit"
+        size="large"
+        variant="outlined"
+        startIcon={<Iconify icon="logos:google-icon" />}
+        loading={isGoogleLoading}
+        onClick={onGoogleSignIn}
+        sx={{ mb: 2 }}
+      >
+        Continue with Google
+      </Button>
+
+      <Divider sx={{ mb: 2 }}>or</Divider>
 
       <Form methods={methods} onSubmit={onSubmit}>
         <Box sx={{ gap: 2, display: 'flex', flexDirection: 'column' }}>

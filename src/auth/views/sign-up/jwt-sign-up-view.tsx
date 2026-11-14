@@ -10,6 +10,7 @@ import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 
@@ -20,6 +21,7 @@ import { RouterLink } from '@/routes/components';
 import { Iconify } from '@/components/iconify';
 import { Form, Field } from '@/components/hook-form';
 import { toast } from '@/components/snackbar';
+import { authClient } from '@/lib/auth/client';
 
 import { signUpWithEmail } from '@/app/auth/sign-up/actions';
 import Typography from '@mui/material/Typography';
@@ -56,6 +58,7 @@ export function JwtSignUpView() {
   const showPassword = useBoolean();
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const defaultValues: SignUpSchemaType = {
     firstName: '',
@@ -97,6 +100,23 @@ export function JwtSignUpView() {
     }
   });
 
+  const onGoogleSignIn = async () => {
+    setErrorMessage(null);
+    setIsGoogleLoading(true);
+
+    try {
+      const { error } = await authClient.signIn.social({
+        provider: 'google',
+        callbackURL: paths.dashboard.root,
+      });
+
+      if (error) throw new Error(error.message || 'Google sign-in failed');
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Google sign-in failed');
+      setIsGoogleLoading(false);
+    }
+  };
+
   return (
     <>
       <Box sx={{ textAlign: { xs: 'center', md: 'left' } }}>
@@ -116,6 +136,21 @@ export function JwtSignUpView() {
           {errorMessage}
         </Alert>
       )}
+
+      <Button
+        fullWidth
+        color="inherit"
+        size="large"
+        variant="outlined"
+        startIcon={<Iconify icon="logos:google-icon" />}
+        loading={isGoogleLoading}
+        onClick={onGoogleSignIn}
+        sx={{ mb: 2 }}
+      >
+        Continue with Google
+      </Button>
+
+      <Divider sx={{ mb: 2 }}>or</Divider>
 
       <Form methods={methods} onSubmit={onSubmit}>
         <Box sx={{ gap: 2, display: 'flex', flexDirection: 'column' }}>
